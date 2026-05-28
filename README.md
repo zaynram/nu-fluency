@@ -23,7 +23,7 @@ The hook is silent when `nu-lint` is unavailable, so the plugin won't error if y
 ## Native LSP Integration
 
 `.lsp.json` at the plugin root registers `nu --lsp` as Claude Code's language server for `.nu` files.
-Once the plugin is installed (and `nu-lint` is on PATH), Claude sees inline diagnostics, hover info, and auto-fixes any time it edits a Nushell file. 
+Once the plugin is installed and the language server connects, Claude sees inline diagnostics, hover info, and auto-fixes any time it edits a Nushell file. 
 No editor configuration needed — Claude Code handles the LSP protocol end-to-end.
 
 For users editing `.nu` files outside Claude Code, the same `nu --lsp` can be configured to work with most of the common LSP-aware editors.
