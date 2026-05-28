@@ -4,6 +4,11 @@
   "description": "Model Context Protocol server exposing queryable Nushell documentation and a Nushell execution environment.",
   "type": "module",
   "bin": "./build/index.js",
+  "files": [
+    "build/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "start": "bun ./build/index.js",
     "dev": "bun run src/index.ts",

@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+      - uses: hustcer/setup-nu@main
+        with:
+          check-latest: true
+
+      - name: install
+        run: bun install --frozen-lockfile
+
+      - name: check
+        run: bun run mcp:check
+
+      - name: build
+        run: bun run mcp:build
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+
+      - name: install
+        run: bun install --frozen-lockfile
+
+      - name: build
+        run: bun run mcp:build
+
+      - name: pack
+        working-directory: server
+        run: |
+          bun pack
+          mv nushell-mcp-*.tgz nushell-mcp.tgz
+
+      - name: release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: server/nushell-mcp.tgz

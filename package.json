@@ -5,6 +5,7 @@
   "workspaces": ["server"],
   "scripts": {
     "mcp": "bun --silent --cwd=server",
+    "mcp:check": "cd server && bunx tsc --noEmit && bun test --bail",
     "mcp:build": "bun --silent --cwd=server run build",
     "mcp:start": "bun --silent --cwd=server run start",
     "mcp:watch": "bun --silent --cwd=server test --watch"
