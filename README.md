@@ -1,10 +1,13 @@
 # nu-fluency
 
-A plugin that helps Claude (and humans) write Nushell idiomatically — not "bash with weird syntax." The training distribution heavily over-represents bash and POSIX shell, so the default reach when writing nu is to translate bash patterns instead of using nu's own structural-data-first primitives. This plugin counteracts that bias by combining authoritative tooling (`nu-lint`) with educational scaffolding (skills, slash commands, an experimental fallback agent).
+A plugin that helps Claude (and humans) write Nushell idiomatically — not "bash with weird syntax." 
+The training distribution heavily over-represents bash and POSIX shell, so the default reach when writing nu is to translate bash patterns instead of using nu's own structural-data-first primitives. 
+This plugin counteracts that bias by combining authoritative tooling (`nu-lint`) with educational scaffolding (skills, slash commands, an experimental fallback agent).
 
-## System dependency: nu-lint
+## Peer Dependency: `nu-lint`
 
-The plugin's hook, `/nu-audit` command, and **the native LSP integration** all delegate to [`nu-lint`](https://codeberg.org/wvhulle/nu-lint) — a deterministic community linter for Nushell with ~150 rules across `idioms`, `posix`-replacement, `parsing`, `dead-code`, `runtime-errors`, and more. Most rules have auto-fixes.
+The commands packaged in this plugin prefer to delegate diagnostics to [`nu-lint`](https://codeberg.org/wvhulle/nu-lint) — a deterministic community linter for Nushell with ~150 rules across `idioms`, `posix`-replacement, `parsing`, `dead-code`, `runtime-errors`, and more. 
+Most rules have auto-fixes, and the rules themselves respect the nuance of diverging from the status quo in the age of LLM.
 
 Install it:
 
@@ -12,23 +15,30 @@ Install it:
 cargo install nu-lint
 ```
 
-On Windows with WSL, install `nu-lint` inside your WSL distribution with the same command — the plugin's hook auto-detects `wsl.exe` and routes through it. The hook is silent when `nu-lint` is unavailable, so the plugin won't error if you skip this step; you'll just lose the deterministic diagnostic surface.
+On Windows with WSL, installing `nu-lint` inside your WSL distribution is supported. 
+The plugin's hook auto-detects `wsl.exe` and routes through it.
 
-## Native LSP integration
+The hook is silent when `nu-lint` is unavailable, so the plugin won't error if you skip this step; you'll just lose out on that deterministic diagnostic surface.
 
-`.lsp.json` at the plugin root registers `nu-lint --lsp` as Claude Code's language server for `.nu` files. Once the plugin is installed (and `nu-lint` is on PATH), Claude sees inline diagnostics, hover info, and auto-fixes any time it edits a Nushell file. No editor configuration needed — Claude Code handles the LSP protocol end-to-end.
+## Native LSP Integration
 
-For users editing `.nu` files outside Claude Code, the same `nu-lint --lsp` works with any LSP-aware editor; see the upstream [`nu-lint` README](https://codeberg.org/wvhulle/nu-lint) for editor-specific wiring.
+`.lsp.json` at the plugin root registers `nu --lsp` as Claude Code's language server for `.nu` files.
+Once the plugin is installed (and `nu-lint` is on PATH), Claude sees inline diagnostics, hover info, and auto-fixes any time it edits a Nushell file. 
+No editor configuration needed — Claude Code handles the LSP protocol end-to-end.
 
-## What's inside
+For users editing `.nu` files outside Claude Code, the same `nu --lsp` can be configured to work with most of the common LSP-aware editors.
 
-| Component | Count | Purpose |
+It may be of interest to know that, `nu-lint` also had an lsp; see the upstream [`nu-lint` README](https://codeberg.org/wvhulle/nu-lint) for editor-specific wiring.
+
+## Components
+
+| Type | Count | Purpose |
 |---|---|---|
-| Skills | 6 | Entry-point `nushell-idioms` + 5 model-only siblings (`user-invocable: false`). Pull-on-demand reference. |
-| Slash commands | 4 | `/nu-shape`, `/nu-env-snapshot`, `/nu-audit`, `/nu-doc`. |
+| Skill | 6 | Entry-point `nushell-idioms` + 5 model-only siblings (`user-invocable: false`). Pull-on-demand reference. |
+| Commands | 4 | `/nu-shape`, `/nu-env-snapshot`, `/nu-audit`, `/nu-doc`. |
 | Agents | 1 | **Experimental fallback** reviewer for `/nu-audit` when `nu-lint` isn't installed. |
 | Hooks | 1 | Post-`nu_run` hook that runs nu-lint on the just-executed pipeline. Silent on clean code. |
-| LSP | 1 | `nu-lint --lsp` via native `.lsp.json` integration. |
+| LSP | 1 | `nu --lsp` via native `.lsp.json` integration. |
 | Configs | 2 | `configs/hook.nu-lint.toml` (narrow rule set for the hook) and `configs/strict.nu-lint.toml` (broad rule set for `/nu-audit`). |
 
 ## Skills
@@ -42,7 +52,9 @@ Only `nushell-idioms` shows up as a slash command (`/nu-fluency:nushell-idioms`)
 - **`nushell-control-flow`** (model-only) — `for`/`each`/`reduce`/`any`/`all`/`take while`, conditionals, `try/catch` vs `?`.
 - **`nushell-modules`** (model-only) — `module`/`use`/`export def`/`export-env`/`main`.
 
-## Slash commands
+## Commands (user-invocable)
+
+> Note: The original `commands` are deprecated in favor of `skills` with `user-invocable: true`; the distinction is preserved in this document for clarity of usage.
 
 - **`/nu-shape <expr>`** — runs `<expr> | describe` + a sample row through `nu_run`. Structural intuition.
 - **`/nu-env-snapshot [keys...]`** — `$env | select --optional <keys>` with sensible defaults.
