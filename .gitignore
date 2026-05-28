@@ -1,3 +1,3 @@
 node_modules/
 .claude/worktrees/
-!server/build/index.js
+dist/

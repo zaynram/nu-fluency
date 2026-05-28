@@ -3,12 +3,17 @@
   "version": "0.0.1",
   "private": true,
   "workspaces": ["server"],
+  "bin": {
+    "nushell-mcp": "./dist/index.js"
+  },
   "scripts": {
     "mcp": "bun --silent --cwd=server",
     "mcp:check": "cd server && bunx tsc --noEmit && bun test --bail",
-    "mcp:build": "bun --silent --cwd=server run build",
-    "mcp:start": "bun --silent --cwd=server run start",
-    "mcp:watch": "bun --silent --cwd=server test --watch"
+    "mcp:build": "bun --silent mcp run build && cp --no-target-directory --recursive server/build dist",
+    "mcp:start": "bun --silent mcp run start",
+    "mcp:watch": "bun --silent mcp test --watch",
+    "mcp:clean": "rm -rf server/build server/node_modules",
+    "mcp:regen": "bun --slient mcp:clean && bun install && bun --silent mcp:build"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
