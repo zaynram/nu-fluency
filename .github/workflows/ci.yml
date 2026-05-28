@@ -22,7 +22,7 @@ jobs:
       - name: Install Nushell
         run: |
           source /home/runner/.bash_profile
-          cargo install nushell
+          cargo install nu
 
       - name: Run tests
         run: bun --cwd=server test
