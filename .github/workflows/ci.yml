@@ -19,7 +19,6 @@ jobs:
       - uses: hustcer/setup-nu@main
         with:
           check-latest: true
-          features: mcp
 
       - name: install
         run: bun install --frozen-lockfile
