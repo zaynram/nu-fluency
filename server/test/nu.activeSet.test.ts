@@ -3,7 +3,7 @@
  * tagging and the sanitizeKey export. Both are infrastructure changes with
  * no user-visible behavior change.
  */
-import { afterAll, describe, expect, test } from "bun:test"
+import { afterAll, beforeAll, describe, expect, test } from "bun:test"
 import {
   _getActiveRoles,
   abortExec,
@@ -16,6 +16,12 @@ import { NuMcpChild } from "../src/nuMcpClient.js"
 import { NuMcpPool } from "../src/nuMcpPool.js"
 
 afterAll(() => {
+  killAll()
+})
+
+// Kill any processes left alive by earlier test files (e.g. the doc singleton
+// spawned by smoke.test.ts) so this suite starts with a clean active set.
+beforeAll(() => {
   killAll()
 })
 
@@ -48,7 +54,8 @@ describe("active set role tagging (Cycle 0)", () => {
 
   test("active set empties after the proc exits", async () => {
     await runRaw("1 + 1")
-    // After await resolves, spawnNu's finally has run; proc is removed.
+    // After await resolves, spawnNu has called removeActive synchronously
+    // before returning, so the active set is clean.
     const roles = _getActiveRoles()
     expect(roles.length).toBe(0)
   })

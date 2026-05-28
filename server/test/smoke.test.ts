@@ -8,7 +8,7 @@
  *
  * Run with: bun test
  */
-import { describe, expect, test } from "bun:test"
+import { afterAll, describe, expect, test } from "bun:test"
 import { tmpdir } from "node:os"
 import {
   _resetBashRunnerProbe,
@@ -25,6 +25,13 @@ import {
 // portability assertions stay valid across Linux, macOS, and Windows
 // (Copilot 3297050891).
 const TMP_DIR = tmpdir()
+
+// Tear down the doc singleton and any other active subprocesses spawned during
+// this file so they don't pollute the active-set state in subsequent test files
+// (e.g. nu.activeSet.test.ts, which asserts the set is empty after runRaw).
+afterAll(() => {
+  killAll()
+})
 
 /**
  * Shared bash-runtime probe. `loadBashEnv("true")` exercises the same detect /
