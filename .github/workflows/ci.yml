@@ -3,11 +3,13 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
     branches: [main]
+
 defaults:
   run:
-    shell: nu {0}
+    shell: bash
 
 jobs:
   build:
@@ -28,3 +30,28 @@ jobs:
 
       - name: build
         run: bun run mcp:build
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+
+      - name: install
+        run: bun install --frozen-lockfile
+
+      - name: build
+        run: bun run mcp:build
+
+      - name: publish to npm
+        working-directory: server
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
+          bun publish --access public
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

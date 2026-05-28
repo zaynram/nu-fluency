@@ -55,7 +55,7 @@ A bucket is a long-lived `nu --mcp` child addressed by a name (regex `[A-Za-z0-9
 ## Install
 
 ```bash
-bun add --global github:zaynram/nushell-mcp
+bun add --global nushell-mcp
 ```
 
 Run it directly with `bunx nushell-mcp`, or wire it into an MCP client.
