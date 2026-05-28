@@ -135,8 +135,14 @@ async function spawnNu(argv: string[], opts: RunOptions): Promise<RawResult> {
       new Response(proc.stderr).text(),
     ])
     await proc.exited
+    // Explicitly clean up before return so the active-set entry is removed
+    // in the same microtask as the return value — guards against runtimes
+    // that defer `finally` to a separate microtask tick.
+    clearTimeout(timer)
+    removeActive(proc)
     return { stdout, stderr, exitCode: proc.exitCode, timedOut }
   } finally {
+    // Error / signal paths: idempotent no-ops in the success case above.
     clearTimeout(timer)
     removeActive(proc)
   }
@@ -454,6 +460,9 @@ async function dumpEnv(
     }
     // Skip sentinel plus the trailing newline from `printf '%s\n'`.
     const envText = stdout.slice(idx + ENV_SENTINEL.length + 1)
+    // Explicit cleanup before return — same rationale as spawnNu.
+    if (timerId !== undefined) clearTimeout(timerId)
+    removeActive(proc)
     return parseEnv0(envText)
   } finally {
     if (timerId !== undefined) clearTimeout(timerId)
