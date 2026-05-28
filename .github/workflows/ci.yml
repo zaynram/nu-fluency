@@ -19,8 +19,13 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Build
-        run: bun run mcp:build
+      - name: Install Nushell
+        run: |
+          source /home/runner/.bash_profile
+          cargo install nushell
 
       - name: Run tests
         run: bun --cwd=server test
+
+      - name: Build
+        run: bun run mcp:build
