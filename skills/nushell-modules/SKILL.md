@@ -13,160 +13,78 @@ user-invocable: false
 
 # Nushell Modules
 
-A `.nu` file becomes a module when imported with `use`. The module's exported names become available under the module's name as a namespace. This is how reusable nu code gets organized — and unlike sourcing in bash, modules have explicit boundaries (only `export def`'d names are visible to the caller).
+A `.nu` file becomes a module when imported with `use`. Only `export`'d names cross the boundary, and the import name itself becomes a namespace. The model is closer to Python's import than to bash's `source` — explicit boundaries, no leak of private definitions.
 
-## The minimal module
+Syntax reference: [cheat-sheet → Modules](../nushell-idioms/references/cheat-sheet.md#modules).
 
-```nu
-# greetings.nu
-export def hello [name: string] {
-    $"hello ($name)"
-}
-```
+## What can be exported
 
-```nu
-# caller
-use greetings.nu
-greetings hello "world"          # → "hello world"
-```
+- **`export def`** — a command. Visible after import; private without the keyword.
+- **`export def --env`** — a command that mutates the caller's `$env` when invoked. `--env` controls env propagation; `export` controls visibility. Both are needed for a public env-mutating function.
+- **`export-env { … }`** — a setup block that runs once at `use` time, in the caller's scope. Use it to seed module-level env state.
+- **`export const NAME = …`** — a parse-time constant. Accessible as `$namespace.NAME` via record-style cell-path access on the namespace name, or as bare `$NAME` after a wildcard import.
 
-The import surfaces `greetings` as a namespace; `greetings hello` calls the exported function. To pull functions into the calling scope directly:
+## Three ways to import
 
-```nu
-use greetings.nu hello           # only `hello` is imported
-hello "world"                    # → "hello world" (no namespace)
-use greetings.nu *               # everything exported
-```
+| Form | Brings into scope | Use when |
+|---|---|---|
+| `use foo.nu` | Namespace `foo` only | You want the prefix discipline; few callers |
+| `use foo.nu name1 name2 …` | The named exports, unprefixed | A small, named subset of the module is used often |
+| `use foo.nu *` | All exports, unprefixed; constants as `$NAME` | Module-as-config or short scripts where prefix is noise |
 
-## The four export forms
+`use` is **parse-time**. The path must be a string literal or a const — you cannot import based on a runtime value.
 
-### `export def` — a command
+## Dispatch: how `main` and subcommands interact
 
-```nu
-export def hello [name: string] { $"hello ($name)" }
-```
+This is the most subtle part of nu modules in 0.113 and the part most often gotten wrong.
 
-### `export def --env` — a command that mutates caller env
+**Without an `export def main`** the namespace name is not callable on its own; it only routes to subcommands:
 
-```nu
-export def --env activate [path: string] {
-    cd $path
-    $env.ACTIVE_PATH = $path
-}
-```
+| Call | Result |
+|---|---|
+| `use foo.nu; foo` | Error — `foo` is not a command |
+| `use foo.nu; foo bar arg` | Calls the exported `bar` with `arg` |
+| `use foo.nu; foo CONST` | Error — constants are not subcommands |
+| `use foo.nu; $foo.CONST` | ✓ Returns the constant |
 
-The `--env` flag is what lets the function's env mutations propagate back to the caller.
+**With an `export def main`** the namespace name becomes the command, and positional args go to `main` — subcommand-style dispatch via the namespace stops working:
 
-### `export-env { … }` — setup that runs at import time
+| Call | Result |
+|---|---|
+| `use foo.nu; foo` | Calls `main []` |
+| `use foo.nu; foo arg` | Calls `main [arg]` — `arg` is a positional argument to `main`, never a subcommand name |
+| `use foo.nu; foo bar arg` | Error — `bar`, `arg` are extra positionals on `main` |
+| `use foo.nu; $foo.CONST` | ✓ Returns the constant |
 
-```nu
-# greetings.nu
-export-env {
-    $env.MYNAME = "default"
-}
-export def hello [] { $"hello ($env.MYNAME)" }
-```
+So **`main` and namespace-subcommand dispatch are mutually exclusive**. If you want both "bare invocation does the default thing" and "named subcommands", pick one of:
 
-```nu
-use greetings.nu
-$env.MYNAME      # "default" — set when the module was imported
-greetings hello  # "hello default"
-```
+- **Selective import** — `use foo.nu hello`; then `hello` is a top-level command. The default behavior (your old `main`) stays reachable via `foo`. Each piece needs its own `use`.
+- **Wildcard import** — `use foo.nu *`; all exports become top-level. `main` is still reachable as `foo`. Constants become `$NAME`.
+- **No `main`** — keep dispatch via the namespace (`foo bar`, `foo baz`) and document that bare `foo` isn't a command.
 
-`export-env` runs once at `use` time. It's where you initialize module-level env vars or any state that should be available immediately on import.
-
-### `export const` — a parse-time constant
-
-```nu
-export const VERSION = "1.0.0"
-```
-
-Available as `greetings VERSION` after import. Useful for module metadata.
-
-## The `main` command
-
-A module can export a `main` function that runs when the module name is called by itself:
-
-```nu
-# greetings.nu
-export def hello [name: string] { $"hello ($name)" }
-
-export def main [] { "greetings and salutations!" }
-```
-
-```nu
-use greetings.nu
-greetings                # → "greetings and salutations!"
-greetings hello "alice"  # → "hello alice"
-```
-
-This is the pattern for "a module that's primarily one command, with subcommands." Think `git`: `git` shows help, `git status` does the thing. The `main` function is `git`; the subcommands are other `export def`s.
+This is the inverse of git's CLI ergonomics. A nu module with `main` is "a command that happens to have helpers exported alongside it"; a nu module without `main` is "a flat namespace of commands." There is no clean "main plus subcommands" in 0.113 without selective/wildcard import on the caller side.
 
 ## Inline modules
 
-For tightly-scoped code, define a module inline:
+`module name { … }` defines a module without a separate file. Same export and dispatch rules as file modules. Useful for grouping a few helpers in a script that doesn't need to be split out.
 
-```nu
-module greetings {
-    export def hello [name: string] {
-        $"hello ($name)"
-    }
-}
-use greetings hello
-hello "world"
-```
+## Project layout
 
-Inline modules don't need separate files. Good for grouping a few helpers without ceremony. The `use greetings hello` form pulls just `hello` into scope.
-
-## Organizing a project
-
-For a multi-file project:
-
-```
-my-project/
-├── main.nu              # entry point
-├── lib/
-│   ├── parser.nu
-│   ├── render.nu
-│   └── utils.nu
-```
-
-```nu
-# main.nu
-use lib/parser.nu
-use lib/render.nu
-
-def run [path: string] {
-    parser parse $path | render render
-}
-```
-
-Modules are referenced by path relative to the importing file. Absolute paths work too. The directory structure mirrors the namespace: `lib/parser.nu` becomes `parser` namespace.
+Path is relative to the importing file (or absolute). Directory structure mirrors the namespace: `lib/parser.nu` imported as `use lib/parser.nu` exposes `parser` as the namespace. There is no `__init__`-style aggregator file — each module is its own `.nu`.
 
 ## Module-as-config
 
-A useful pattern: a module that exists purely to set up env and helpers, imported once at session start:
+A module imported once at session start, intended purely to install env and helpers into the calling scope:
 
-```nu
-# nu-fluency.nu
-export-env {
-    $env.NU_FLUENCY_LOADED = true
-}
-export def lint [path: string] { … }
-export def shape [expr: any] { … }
-```
-
-```nu
-# config.nu (sourced at session start)
-use ~/.config/nushell/nu-fluency.nu *
-```
-
-After session start, `lint` and `shape` are available globally.
+- Wildcard the import in `config.nu` (`use ~/.config/nushell/nu-fluency.nu *`).
+- Put the env seed in `export-env { … }`.
+- Don't define a `main`; the module isn't meant to be "invoked."
 
 ## Pitfalls
 
-- **Forgetting `export`** — a `def` without `export` is private to the module and won't be visible after `use`.
-- **`use` is parse-time**: you can't dynamically import based on a runtime variable; the path must be a literal or const.
-- **`export-env` runs only once**, when the module is first imported. Subsequent `use` calls in the same session don't re-run it.
-- **Module name conflicts**: if two modules export the same name and both are wildcarded into scope, the second wins. Be explicit (`use foo.nu hello as foo_hello`) if you need disambiguation.
-- **`def --env` vs `export def --env`**: the `--env` flag controls env propagation; `export` controls visibility. Both are needed if you want a public env-mutating function.
+- **Forgetting `export`** — a `def` without `export` is private to the module. The error at the call site is "Command not found", which is confusing if you expected it to be visible.
+- **Expecting `namespace subcommand args` to work when `main` is defined** — it doesn't. The subcommand name is treated as a positional argument to `main`. This is the single most common module bug.
+- **Expecting `namespace CONST` to fetch a constant** — same trap as above. Use `$namespace.CONST` (record-style) or wildcard-import to get `$CONST`.
+- **`export-env` only runs at first `use`** — subsequent `use` in the same session is a no-op for env setup.
+- **Wildcard name collisions** — `use foo.nu *; use bar.nu *` with overlapping exports: the second wins silently. Disambiguate with `use foo.nu name as foo_name`.
+- **Dynamic paths** — `use $some_var` does not work. `use` resolves at parse time; the path must be a literal or `const`.

@@ -16,99 +16,37 @@ user-invocable: false
 
 In bash, string manipulation is a parade of `sed`, `awk`, `grep`, `cut`, `tr`, `printf`. In nu, there are three primary tools — `parse`, the `str` namespace, and the `from <format>` family — plus interpolation. The shift to internalize: **nu wants you to parse strings into structured data and then operate on the data**, not chain text transformations.
 
+Syntax reference: [cheat-sheet → Strings](../nushell-idioms/references/cheat-sheet.md#strings).
+
 ## The four primary tools
 
 ### 1. `parse '{name} {pattern}'` — typed extraction
 
-The strongest single tool. Takes a template with named captures, returns a table:
-
-```nu
-'Nushell 0.111' | parse '{shell} {version}'
-# → ╭───┬─────────┬─────────╮
-#   │ # │  shell  │ version │
-#   ├───┼─────────┼─────────┤
-#   │ 0 │ Nushell │ 0.111   │
-#   ╰───┴─────────┴─────────╯
-
-ls | get name | parse '{stem}.{ext}'   # split filenames into stem/ext
-```
-
-Whenever you'd reach for `awk '{print $2}'` or a regex with named groups, `parse` is the right tool. The output is a table — chain `get` or `select` to extract.
-
-For full regex, `parse --regex '<pattern>'` accepts standard regex syntax with named captures `(?<name>…)`.
+The strongest single tool. Takes a template with named captures and returns a **table**. Whenever the bash instinct is `awk '{print $2}'` or a regex with named groups, `parse` is the right tool — chain `get` or `select` to extract from the returned table. For full regex, `parse --regex '<pattern>'` accepts standard syntax with named captures `(?<name>…)`. A common idiom: `ls | get name | parse '{stem}.{ext}'` to split filenames.
 
 ### 2. The `str` namespace
 
-```nu
-"hello" | str upcase            # "HELLO"
-"hello" | str downcase
-"hello" | str length            # 5
-"  pad  " | str trim
-"hello world" | str contains "world"        # true
-"hello world" | str replace "world" "nu"    # "hello nu"
-"hello world" | str replace --regex 'w.+' "x"
-"hello world" | str starts-with "hello"
-"hello world" | str ends-with "world"
-"hello" | str substring 1..3                 # "el"
-"a-b-c" | str index-of "-"                   # 1
-```
-
-The `str` namespace covers ~95% of single-string manipulation. Tab-complete `str ` to discover the full set.
+Covers ~95% of single-string manipulation — case conversion (`upcase`, `downcase`, `capitalize`, `camel-case`, `snake-case`, etc.), inspection (`length`, `contains`, `starts-with`, `ends-with`, `index-of`, `distance`), slicing (`substring`), replacement (`replace`, `replace --all`, `replace --regex`), trimming (`trim`, `trim --char`), and reshaping (`reverse`, `expand`). Tab-complete `str ` to discover the full set; 23 subcommands as of nu 0.113.
 
 ### 3. The `from <format>` family
 
-```nu
-'[{"x": 1, "y": 2}]' | from json
-"a,b\n1,2\n3,4" | from csv
-"key: val\nlist:\n  - 1\n  - 2" | from yaml
-$toml_text | from toml
-$nuon_text | from nuon
-```
+`from json`, `from csv`, `from yaml`, `from toml`, `from nuon` each read a string and return structured data. `from nuon` is a JSON-superset parser — it accepts both nu's native form and plain JSON. The pair `from json` and `to json` round-trip; `to nuon --serialize` round-trips closures too.
 
-These read a string and return structured data. `from nuon` is JSON-superset, so it parses both nu's native and JSON forms. The pair `from json` and `to json` round-trip; `to nuon --serialize` round-trips closures too.
+### 4. Interpolation: `$"…"` and `$'…'`
 
-### 4. Interpolation: `$"…"`
-
-```nu
-let name = "alice"
-$"hello ($name)"                       # "hello alice"
-$"size: ($file | get size)"            # arbitrary expressions in parens
-$"(ansi red)error(ansi reset)"         # terminal colors
-```
-
-`$"…"` is interpolation; `"…"` is a plain string. The inner expressions inside `(…)` are full nu expressions, not just variable names — `$"sum: ([1 2 3] | math sum)"` works.
+The `$` prefix turns either quote form into an interpolation. Inside `(…)`, full nu expressions are evaluated — `$"sum: ([1 2 3] | math sum)"` works. Double-quoted interpolation `$"…"` interprets backslash escapes; single-quoted interpolation `$'…'` preserves backslashes verbatim. Plain `"…"` and `'…'` (no `$`) are non-interpolating strings with the same escape distinction.
 
 ## Splitting and joining
 
-```nu
-"a,b,c" | split row ","                 # ["a", "b", "c"]
-"line1\nline2" | split row "\n"         # ["line1", "line2"]
-"line1\nline2" | lines                  # same, but handles \r\n on Windows
-"a b c d" | split column " "            # → {column1: a, column2: b, …}
-[a b c] | str join "-"                  # "a-b-c"
-```
-
-`lines` is the preferred line-splitter — handles `\r\n` correctly.
+`lines` is the preferred line-splitter — it handles `\r\n` correctly across platforms. `split row` returns a list of strings; `split column` returns a single-row table with auto-named columns (`column0`, `column1`, …). Pick by what the next stage expects.
 
 ## Encoding conversion
 
-```nu
-"hello" | encode utf-8        # → binary
-$bytes | decode utf-8         # → string
-"yes" | encode base64
-"eWVz" | decode base64
-```
+`encode utf-8` and `decode utf-8` convert between strings and binary; `encode base64` / `decode base64` handle base64 (both produce/consume strings — chain `decode utf-8` after `decode base64` to recover text from base64-encoded bytes).
 
 ## Regex
 
-When `parse` doesn't fit, full regex via `str replace --regex` or `find --regex`:
-
-```nu
-"foo123bar" | str replace --regex '\d+' "X"     # "fooXbar"
-[abc abd abe] | find --regex "^ab[cd]"          # filter by regex match
-```
-
-For extraction with captures, `parse --regex '(?<name>pattern)'` is cleaner than `find --regex` + post-processing.
+When `parse` doesn't fit, full regex is available via `str replace --regex` (substitute) and `find --regex` (filter list elements). For extraction with captures, `parse --regex '(?<name>pattern)'` reads more cleanly than `find --regex` followed by post-processing.
 
 ## NUON string subtleties
 
@@ -131,6 +69,6 @@ Coming from bash, the instinct is "transform text → transform text → final t
 ## Pitfalls
 
 - **`echo`** in nu prints a list of values, not a string. Use `print` for stdout-side-effect, `$"…"` for interpolation.
-- **Single-quoted strings** are literal — no interpolation, no escapes (except `\\`). Use double quotes for interpolation.
+- **`'…'` (plain single-quoted) is literal** — no escapes interpreted. For interpolation that still preserves backslashes, use the `$` prefix: `$'…'`. Plain double-quoted `"…"` interprets escapes; `$"…"` adds interpolation on top.
 - **`split row` vs `split column`**: row → list of strings; column → record with auto-named columns. Pick by what you want next.
 - **`parse` returns a table**, not a record. Use `parse … | first | …` if you expect one match.

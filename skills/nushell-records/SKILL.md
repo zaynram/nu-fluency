@@ -16,6 +16,8 @@ user-invocable: false
 
 Records are nu's primary data structure. A record is `{key: value, …}`. A table is a list of records that all share the same column shape — `[[a b]; [1 2] [3 4]]` is a table with two columns `a` and `b` and two rows. The distinction matters because some operations are record-shaped and some are table-shaped, and converting between the two is one of the most common operations.
 
+Syntax reference: [cheat-sheet → Records / Tables](../nushell-idioms/references/cheat-sheet.md#records).
+
 ## The mental model
 
 - **Record** = single key/value structure. Indexed by name. Order preserved.
@@ -66,26 +68,11 @@ Read as: "from each entry, emit a single-key record if the value is a string, dr
 
 ## Cell paths and safe navigation
 
-```nu
-$record.name              # error if missing
-$record.name?             # null if missing
-$record.deep.nested.val?  # null at any missing link
-$list.3                   # index access on a list
-$table.0.name             # row 0, column name
-$record.name? | default "unknown"
-```
-
-The `?` postfix is **the** idiom for safe access. Reach for `try/catch` only when an operation might throw for reasons other than a missing key.
+The `?` postfix is **the** idiom for safe access — works inline on any cell path across records, lists, and tables (`$record.name?`, `$list.3?`, `$table.0.name?`). Reach for `try/catch` only when an operation might throw for reasons other than a missing key.
 
 ## Selecting columns with `--optional`
 
-`select --optional` is `?` for the column-projection case:
-
-```nu
-$record | select --optional A B C     # missing keys → null instead of error
-```
-
-Useful when probing `$env` or unknown-shape data. The deprecated `-i` flag does the same thing; new code should use `--optional`.
+`select --optional KEY1 KEY2` is `?` for the column-projection case — missing keys return null instead of erroring. Useful when probing `$env` or unknown-shape data. The deprecated `-i` flag does the same thing; new code should use `--optional`.
 
 ## Record ↔ table ↔ list
 
@@ -114,22 +101,7 @@ The chain `items { … } | where … | into record` is the canonical "filter-and
 
 ## Table operations
 
-```nu
-$table | sort-by size --reverse
-$table | first 5
-$table | where { |row| $row.size > 1kb }
-$table | group-by ext              # → record where keys are ext, values are tables
-$table | each { |row| $row.name }  # extract one column as a list
-$table | select name size          # column projection
-$table | rename old new
-$table | move score --after name
-$table | drop column               # remove rightmost column
-$table | append $other_table       # concat (must share columns)
-$table | insert score 0            # add a column with constant value
-$table | update score { |row| $row.score + 1 }
-```
-
-`update <col> { |row| ... }` is the row-level mutation idiom — the closure receives each row and returns the new column value.
+`update <col> { |row| ... }` is the row-level mutation idiom — the closure receives each row and returns the new column value. The dual `insert <col> { |row| ... }` adds a column whose values are computed per-row. Both are cleaner than `each { |row| ... }` chains when only one column changes.
 
 ## When records aren't enough
 

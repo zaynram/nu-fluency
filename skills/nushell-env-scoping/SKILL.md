@@ -16,6 +16,8 @@ user-invocable: false
 
 `$env` in nu is a record like any other, but it has **scope semantics that bite hard if you don't know the rules.** Closures isolate env by default. Some constructs propagate; most don't. Some vars can't be set manually at all. This skill names the rules.
 
+Syntax reference: [cheat-sheet → Env and Scope](../nushell-idioms/references/cheat-sheet.md#env-and-scope).
+
 ## The four propagation rules
 
 1. **Top-level code** mutates the script's env. Always propagates downward to children.
@@ -29,33 +31,15 @@ This is the entire spec. The biggest trap is writing `each { |x| $env.LAST = $x 
 
 ### `do { … }` and `do --env { … }`
 
-```nu
-do { $env.X = "a" }; $env.X?             # null (no propagation)
-do --env { $env.X = "a" }; $env.X        # "a" (propagated)
-```
-
-`do --env` is what lets the user pipeline in nushell-mcp's persistence layer reach the post-pipeline save step. Without it, all the user's `$env.FOO = …` writes vanish at the `do` boundary.
+Plain `do` runs the closure in an isolated scope — env mutations inside vanish at the closing brace. `do --env` propagates mutations back to the caller; reach for it whenever a closure should write to the outer env (e.g. persistence-layer save steps that need to see the user pipeline's `$env.FOO = …` writes).
 
 ### `with-env { … } { … }`
 
-```nu
-with-env { TMP: "/tmp", USER: "alice" } {
-    # Inside: TMP and USER are set
-    run-thing
-}
-# Outside: TMP and USER are back to whatever they were before
-```
-
-Scoped env, downward-only. Use for "run this command with a specific env without polluting the parent." Mutations inside the closure **do not** escape — that's the point.
+Scoped env, downward-only. Sets the given record into env only for the duration of the closure; env reverts on exit. Mutations made inside the closure do not escape — that is the point. Use it for "run this command with a specific env without polluting the parent."
 
 ### `load-env { … }`
 
-```nu
-load-env { A: "1", B: "2" }
-$env.A   # "1"
-```
-
-Bulk-set env from a record, **at the current scope**. The most common idiom for "merge a record into env." Subject to the same propagation rules as direct `$env.X = …`: works at top level, blocked inside `each`, propagates with `do --env`.
+Bulk-merges a record into env at the current scope. Subject to the same propagation rules as direct `$env.X = …` assignment: works at top level, blocked inside `each`, propagates with `do --env`.
 
 ## Automatic env vars (cannot be set manually)
 
@@ -79,23 +63,7 @@ There's also a longer list of `LAST_EXIT_CODE`, `OLDPWD`, `NU_VERSION`, `PROCESS
 
 ## Setting env at function boundaries
 
-A `def` is a closure boundary by default — env mutations inside a `def`'d function don't leak out. To make a function mutate caller env:
-
-```nu
-def --env cd-tmp [] { cd /tmp; $env.WAS_HERE = true }
-cd-tmp
-$env.WAS_HERE   # true (because of --env)
-```
-
-For modules that need to set up env on import, use `export-env { … }`:
-
-```nu
-# greetings.nu
-export-env { $env.MYNAME = "Arthur" }
-export def hello [] { $"hello ($env.MYNAME)" }
-```
-
-Importing this module runs the `export-env` block in the caller's scope.
+A `def` is a closure boundary by default — env mutations inside a `def`'d function don't leak out. The `--env` flag opts in to caller-env mutation (`def --env name [...] { ... }`). For modules that need to set env at import time, use `export-env { … }`: the block runs in the caller's scope when `use module.nu` is invoked. Both forms are necessary because the default for functions, like for closures, is isolation.
 
 ## Common debugging move
 

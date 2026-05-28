@@ -65,6 +65,11 @@ Internalize asking yourself the following question when composing a Nushell pipe
 
 Majority of the time, it is a transformation and does not need assignment.
 
+Two `let` forms exist and behave differently:
+
+- **Statement form** `let name: TYPE = <expr>` is parse-time. Type annotation is enforced (record/string mismatches reject; lists widen if there's overlap with the annotation).
+- **Pipeline form** `<pipeline> | let name` is runtime. Any `: TYPE` annotation is cosmetic — the binding takes the pipeline's actual type; no typecheck runs. Reach for it when binding a name mid-stream is genuinely useful; do not reach for it to "check the shape of a value at runtime".
+
 ## Bash to Nushell Equivalents
 
 | Bash | Nushell |
@@ -81,7 +86,7 @@ Majority of the time, it is a transformation and does not need assignment.
 | `if [[ "$x" == "y" ]]; then …; fi` | `if $x == "y" { … }` |
 | `read -r line` | (rare; nu is non-interactive by default in scripts) |
 | `printf "%s\n" "${arr[@]}"` | `$arr \| each { print $in }` (but usually you just want `$arr`) |
-| `cmd 2>/dev/null` | `cmd \| complete \| get stdout` (capture both, inspect both) |
+| `cmd 2>/dev/null` | `cmd e>\| ignore` (drop stderr); `cmd \| complete` to capture both for inspection |
 | `set -e` | (built-in; pipelines stop on first error unless `try` wraps) |
 
 ## Anti-Patterns: Common Mistakes
@@ -292,7 +297,8 @@ The following mapping can be used to compound relevant sibling skills:
 
 [cheat sheet](./references/cheat-sheet.md)
 
-- Contains a longer quick-reference guide with one example per primitive.
+- Syntax-dense quick reference with annotated examples and inline-comment results for every primitive, plus sections on conversions, records, lists, tables, strings, filesystem, env and scope, variables, control flow, custom commands, modules, and cross-cutting flags.
+- Each section that has a matching sibling skill links back to it as the conceptual reference.
 
 ## Constraints
 

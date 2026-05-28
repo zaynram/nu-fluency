@@ -16,6 +16,8 @@ user-invocable: false
 
 The single biggest decision in nu iteration is **`for` vs `each`** — they look similar, but they have completely different scope semantics. The single biggest decision in nu error handling is **`?` postfix vs `try/catch`** — they look unrelated, but they solve overlapping problems and `?` is almost always the right reach.
 
+Syntax reference: [cheat-sheet → Control Flow](../nushell-idioms/references/cheat-sheet.md#control-flow) and [Lists → Operations and Accessing](../nushell-idioms/references/cheat-sheet.md#lists).
+
 ## Iteration: pick the right tool
 
 | Construct | Returns | Env propagates? | Use when |
@@ -48,49 +50,15 @@ The `--fold INIT` form is the long version; `-f INIT` is the short flag.
 
 ## Conditionals
 
-### `if/else`
+`if` is an expression — it returns the chosen branch's value. No need for assignment inside; just use the whole expression as the value (`let result = (if ... { ... } else { ... })`).
 
-```nu
-if $x > 0 { "positive" } else if $x < 0 { "negative" } else { "zero" }
-```
-
-`if` is an expression — returns the chosen branch's value. No need for assignment inside; just use the whole expression as the value.
-
-### `match`
-
-```nu
-match $color {
-    "red" => 1,
-    "green" => 2,
-    "blue" => 3,
-    _ => 0,
-}
-```
-
-Patterns can match literals, ranges, records, lists. The fallback wildcard is `_`. For pattern matching on structured values:
-
-```nu
-match $event {
-    {type: "click", x: $x, y: $y} => $"clicked at ($x), ($y)",
-    {type: "key", key: $k} => $"keypress ($k)",
-    _ => "unknown event",
-}
-```
+`match` patterns can match literals, ranges, records, and lists. The fallback wildcard is `_`. Arms can destructure with `$`-prefixed bindings — `{type: "click", x: $x}` matches a record-shaped value and binds `$x` from the inner field. Use match for branching on shape, not just value.
 
 ## Error handling
 
 ### The `?` postfix — first reach
 
-For "this might be missing, default if so":
-
-```nu
-$record.name?                            # null instead of error
-$record.deeply.nested.field?             # null at any link
-$record.name? | default "anonymous"
-$list.10? | default "out of bounds"
-```
-
-Use `?` **inline on the cell path itself**, not as a wrapper around it. It returns null instead of erroring, then `default` substitutes a value.
+For "this might be missing, default if so". Use `?` **inline on the cell path itself**, not as a wrapper around the access — `$record.deeply.nested.field?` returns null at the first missing link rather than erroring, and `$list.10?` is the list-index equivalent. Compose with `default` to substitute a value: `$record.name? | default "anonymous"`.
 
 ### `try/catch` — when something else might throw
 
@@ -116,63 +84,16 @@ The catch closure receives an error record with `msg`, `debug`, `raw`, etc. The 
 
 ### Expression-form `try`
 
-`try` is an expression — you can use it on the right-hand side of a `let`:
+`try` is an expression — you can use it on the right-hand side of a `let`: `let parsed = (try { open --raw $path | from json } catch { {} })`. This is the right idiom for "load if possible, default if not." The catch returns the default value, `let` binds the result. Avoids splitting load into multiple statements.
 
-```nu
-let parsed = (try { open --raw $path | from json } catch { {} })
-```
+## A note on iteration shortcuts
 
-This is the right idiom for "load if possible, default if not." The catch returns the default value, `let` binds the result. Avoids splitting load into multiple statements.
-
-## Common iteration patterns
-
-### Map a list
-
-```nu
-[1 2 3] | each { |n| $n * 2 }
-```
-
-### Filter a list
-
-```nu
-[1 2 3 4] | where $it > 2
-# $it is the implicit current-element name when the closure is one-arg
-```
-
-### Map with index
-
-```nu
-[a b c] | enumerate | each { |row| $"($row.index): ($row.item)" }
-```
-
-### Aggregate predicate
-
-```nu
-$items | any { |x| $x.status == "error" }    # any errors?
-$items | all { |x| $x.valid }                 # all valid?
-```
-
-### Reduce to a single value
-
-```nu
-[1 2 3 4] | reduce -f 0 { |n, acc| $acc + $n }    # sum
-[1 2 3 4] | math sum                                # built-in
-```
-
-For sum/product/min/max/avg, prefer `math sum`/`math product`/`math min`/etc — they're more direct and read better.
-
-### Conditional skip
-
-```nu
-let result = (if $env.MODE == "prod" { run-prod } else { run-dev })
-```
-
-`if` is an expression — assign its value directly.
+For sum/product/min/max/avg, prefer `math sum` / `math product` / `math min` over a hand-rolled `reduce` — they read better and need no init value. The `$it` implicit-element name works inside one-arg closures (`where $it > 2`), useful for short predicates that don't earn a named parameter. Use `enumerate` to pair each element with its index before mapping.
 
 ## Pitfalls
 
 - **`each` for env mutation** is the most common iteration bug. If the loop body touches `$env`, use `for`.
-- **`reduce` param order** trips up JS-fluent developers. Element first, accumulator second.
+- **`reduce` param order** is element-first, accumulator-second — the opposite of most reduce APIs in other languages. Easy slip from muscle memory.
 - **Catching everything silently** is bad style — at least log to stderr.
 - **`try/catch` around a single cell-path access** is verbose; `?` is the inline form.
 - **`break` and `continue`** are not commonly used in nu pipelines (they exist in `for`/`while` loops but break the "transform a stream" mental model). Reach for `take while`/`skip while`/`first N` instead.
