@@ -28,7 +28,7 @@ No editor configuration needed — Claude Code handles the LSP protocol end-to-e
 
 For users editing `.nu` files outside Claude Code, the same `nu --lsp` can be configured to work with most of the common LSP-aware editors.
 
-It may be of interest to know that, `nu-lint` also had an lsp; see the upstream [`nu-lint` README](https://codeberg.org/wvhulle/nu-lint) for editor-specific wiring.
+It may be of interest to know that, `nu-lint` also has a language server; see the upstream [`nu-lint` README](https://codeberg.org/wvhulle/nu-lint) for editor-specific wiring.
 
 ## Components
 
