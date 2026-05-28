@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "mcp__nushell__nu_run",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "nu --stdin ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/lint-pipeline.nu",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

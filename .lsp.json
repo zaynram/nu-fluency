@@ -1,0 +1,11 @@
+{
+  "nu-lint": {
+    "command": "nu",
+    "args": ["--lsp"],
+    "extensionToLanguage": {
+      ".nu": "nu"
+    },
+    "restartOnCrash": true,
+    "maxRestarts": 3
+  }
+}

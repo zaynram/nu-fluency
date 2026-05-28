@@ -1,0 +1,19 @@
+# nu-fluency strict config: broad rule set for explicit `/nu-audit` runs.
+# Less conservative than hook mode — surfaces everything nu-lint can flag.
+
+[groups]
+posix = "warning"
+idioms = "warning"
+parsing = "warning"
+dead-code = "warning"
+runtime-errors = "warning"
+type-safety = "warning"
+filtering = "warning"
+iteration = "warning"
+performance = "hint"
+effects = "hint"
+external = "warning"
+documentation = "hint"
+naming = "hint"
+formatting = "hint"
+upstream = "warning"

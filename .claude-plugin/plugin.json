@@ -1,0 +1,16 @@
+{
+  "name": "nu-fluency",
+  "version": "0.3.2",
+  "description": "Recalibrates the model toward idiomatic Nushell \u2014 skills, slash commands, and a soft post-tool-use hook that nudges away from common bash-translation patterns.",
+  "author": {
+    "name": "zayn"
+  },
+  "keywords": [
+    "nushell",
+    "nu",
+    "shell",
+    "idioms",
+    "education"
+  ],
+  "license": "MIT"
+}

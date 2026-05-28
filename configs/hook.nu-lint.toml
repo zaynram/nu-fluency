@@ -1,0 +1,23 @@
+# nu-fluency hook config: minimum-noise rule set for per-call linting.
+# Focused on the "this code is bash thinking in nu syntax" anti-patterns;
+# everything stylistic is off so the hook only fires on substantive issues.
+
+[groups]
+posix = "warning"           # awk/sed/grep/etc. → nu equivalents — the bullseye
+idioms = "warning"          # nu-native simplifications
+parsing = "warning"         # better text-parsing patterns
+dead-code = "hint"          # useful but lower priority
+
+# Stylistic rules — off in hook mode because they fire on every other
+# line of valid code. Enable in your editor's LSP config or via /nu-audit.
+naming = "off"
+formatting = "off"
+documentation = "off"
+type-safety = "off"
+filtering = "off"
+iteration = "off"
+performance = "off"
+effects = "off"
+runtime-errors = "off"      # noisy on ad-hoc pipelines that intentionally don't error-handle
+external = "off"
+upstream = "off"
