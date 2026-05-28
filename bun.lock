@@ -4,6 +4,9 @@
   "workspaces": {
     "": {
       "name": "nu-fluency",
+      "dependencies": {
+        "nushell-mcp": "workspace:*",
+      },
       "devDependencies": {
         "@types/node": "^25.9.1",
         "bun-types": "^1.3.14",
@@ -14,7 +17,7 @@
       "name": "nushell-mcp",
       "version": "0.2.0",
       "bin": {
-        "nushell-mcp": "src/index.ts",
+        "nushell-mcp": "dist/index.js",
       },
       "dependencies": {
         "@modelcontextprotocol/sdk": "^1.28.0",
