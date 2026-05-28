@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+      - uses: hustcer/setup-nu@main
+        with:
+          check-latest: true
+
+      - name: mcp:check
+        run: |
+          bun install --frozen-lockfile
+          bun run mcp:check
