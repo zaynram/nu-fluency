@@ -55,14 +55,12 @@ A bucket is a long-lived `nu --mcp` child addressed by a name (regex `[A-Za-z0-9
 ## Install
 
 ```bash
-git clone https://github.com/zaynram/nushell-mcp.git
-cd nushell-mcp
-bun install
+bun add --global github:zaynram/nushell-mcp
 ```
 
-Run it directly with `bun run start`, or wire it into an MCP client.
+Run it directly with `bunx nushell-mcp`, or wire it into an MCP client.
 
-## Client configuration
+## Client Configuration
 
 Add to your client's MCP server config — for Claude Desktop, that is
 `%APPDATA%/Claude/claude_desktop_config.json`:
@@ -71,8 +69,8 @@ Add to your client's MCP server config — for Claude Desktop, that is
 {
   "mcpServers": {
     "nushell-mcp": {
-      "command": "bun",
-      "args": ["C:\\Users\\ramda\\mcp-data\\nushell-mcp\\src\\index.ts"]
+      "command": "bunx",
+      "args": ["nushell-mcp"]
     }
   }
 }
