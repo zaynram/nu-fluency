@@ -31,7 +31,7 @@ jobs:
       - name: build
         run: bun run mcp:build
 
-  publish:
+  release:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
@@ -48,10 +48,13 @@ jobs:
       - name: build
         run: bun run mcp:build
 
-      - name: publish to npm
+      - name: pack
         working-directory: server
         run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
-          bun publish --access public
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          bun pack
+          mv nushell-mcp-*.tgz nushell-mcp.tgz
+
+      - name: release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: server/nushell-mcp.tgz
