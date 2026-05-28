@@ -4,7 +4,7 @@
   "private": true,
   "workspaces": ["server"],
   "bin": {
-    "nushell-mcp": "./dist/index.js"
+    "nushell-mcp": "dist/index.js"
   },
   "scripts": {
     "mcp": "bun --silent --cwd=server",
