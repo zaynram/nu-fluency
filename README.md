@@ -4,9 +4,9 @@ A plugin that helps Claude (and humans) write Nushell idiomatically — not "bas
 The training distribution heavily over-represents bash and POSIX shell, so the default reach when writing nu is to translate bash patterns instead of using nu's own structural-data-first primitives. 
 This plugin counteracts that bias by combining authoritative tooling (`nu-lint`) with educational scaffolding (skills, slash commands, an experimental fallback agent).
 
-## Bundled MCP Server
+## MCP Server
 
-This plugin bundles an MCP server at named `nushell-mcp`, which provides a curated set of Nushell utilities to Claude. See the [`README`](./server/README.md) for the full tool surface.
+This plugin consumes an MCP server named `nushell-mcp`, which was authored in-tandem and provides a curated set of Nushell utilities to Claude. See the [package listing](https://github.com/zaynram//server/README.md) for more information.
 
 ## Peer Dependency: Nu-Lint
 
