@@ -7,8 +7,8 @@
   },
   "mcpServers": {
     "nushell": {
-      "command": "bun",
-      "args": ["--cwd=${CLAUDE_PLUGIN_ROOT}", ""]
+      "command": "bunx",
+      "args": ["nushell-mcp@latest"]
     }
   },
   "keywords": ["nushell", "nu", "shell", "idioms", "education"],
