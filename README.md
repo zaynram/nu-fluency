@@ -6,7 +6,7 @@ This plugin counteracts that bias by combining authoritative tooling (`nu-lint`)
 
 ## MCP Server
 
-This plugin consumes an MCP server named `nushell-mcp`, which was authored in-tandem and provides a curated set of Nushell utilities to Claude. See the [package listing](https://github.com/zaynram//server/README.md) for more information.
+This plugin consumes an MCP server named `nushell-mcp`, which was authored in-tandem and provides a curated set of Nushell utilities to Claude. See the [package listing](https://www.npmjs.com/package/nushell-mcp) for more information.
 
 ## Peer Dependency: Nu-Lint
 
