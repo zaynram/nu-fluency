@@ -1,5 +1,5 @@
 {
-  "nu-lint": {
+  "nu-lsp": {
     "command": "nu",
     "args": ["--lsp"],
     "extensionToLanguage": {
