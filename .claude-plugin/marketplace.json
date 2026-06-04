@@ -8,7 +8,7 @@
     "description": "Nushell documentation plugin with a bundled MCP server for providing Claude with access to Nushell.",
     "version": "0.1.0.0"
   },
-  "plugins" [
+  "plugins": [
     {
       "name": "nu-fluency",
       "version": "1.0.2",
