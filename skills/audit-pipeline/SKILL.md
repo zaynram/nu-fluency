@@ -41,7 +41,7 @@ Render the diagnostics directly, one per line, with line/column references.
 
 2. Else,
 
-Invoke the `nu-idiom-reviewer` Task agent as a fallback.
+Use the `generate-diagnostics` Task agent as a fallback diagnostics generator.
 
 Prepend a one-line caveat to your output indicating the diminished integrity.
 
