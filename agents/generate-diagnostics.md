@@ -1,6 +1,6 @@
 ---
 name: generate-diagnostics
-description: This agent is used when `nu-lint` isn't installed on the host, and the user requests `diagnostics` or a `review` of any Nushell code. Most often, this agent will be invoked through execution of the `nu-audit` workflow.
+description: This agent is used when `nu-lint` isn't installed on the host, and the user requests `diagnostics` or a `review` of any Nushell code. Most often, this agent will be invoked through execution of the `audit-pipeline` workflow.
 model: inherit
 color: yellow
 tools: ["Read"]
