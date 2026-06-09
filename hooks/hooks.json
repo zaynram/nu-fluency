@@ -2,7 +2,7 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "mcp__nushell__nu_run",
+        "matcher": "mcp__nushell__nu_exec",
         "hooks": [
           {
             "type": "command",
