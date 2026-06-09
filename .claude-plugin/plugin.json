@@ -1,16 +1,25 @@
 {
   "name": "nu-fluency",
   "version": "0.3.2",
-  "description": "Recalibrates the model toward idiomatic Nushell \u2014 skills, slash commands, and a soft post-tool-use hook that nudges away from common bash-translation patterns.",
-  "author": {
-    "name": "zayn"
-  },
+  "displayName": "Nushell Fluency",
+  "repository": "https://github.com/zaynram/nu-fluency.git",
+  "description": "Recalibrates the model toward idiomatic Nushell skills, slash commands, and a soft post-tool-use hook that nudges away from common bash-translation patterns.",
+  "author": { "name": "Zayn Ramdass", "email": "ramdasszayn@gmail.com" },
+  "keywords": ["nushell", "nu", "shell", "idioms", "education"],
+  "license": "MIT",
   "mcpServers": {
     "nushell": {
       "command": "bunx",
       "args": ["nushell-mcp@latest"]
     }
   },
-  "keywords": ["nushell", "nu", "shell", "idioms", "education"],
-  "license": "MIT"
+  "lspServers": {
+    "nushell": {
+      "command": "nu",
+      "args": ["--lsp"],
+      "extensionToLanguage": { ".nu": "nu" },
+      "restartOnCrash": true,
+      "maxRestarts": 3
+    }
+  }
 }
