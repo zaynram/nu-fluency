@@ -1,6 +1,6 @@
 {
   "name": "nu-fluency",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "displayName": "Nushell Fluency",
   "repository": "https://github.com/zaynram/nu-fluency.git",
   "description": "Recalibrates the model toward idiomatic Nushell skills, slash commands, and a soft post-tool-use hook that nudges away from common bash-translation patterns.",
