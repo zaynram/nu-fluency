@@ -1,10 +1,10 @@
 ---
 name: inspect-shape
-description: This skill is used to inspect the structure of a nu expression. It surfaces the data's described type, it's length (if applicable), and a sample of the value. The sample will contain the raw value itself for non-enumerable types, otherwise it will contain the first three values of the enumerable.
+description: Inspect the structure of a `nu` expression and return the data's described type, it's length (if applicable), and the value itself.
 user-invocable: true
 argument-hint: [<expression>]
 arguments: [expr]
-allowed-tools: ["mcp__nushell__nu_run"]
+allowed-tools: ["mcp__nushell__nu_exec"]
 ---
 
 # Inspect Shape
@@ -17,24 +17,34 @@ nu --version
 
 ## Procedure
 
-Invoke the `inspect.nu` script with the expression as pipeline input.
+Pass the provided expression as pipeline input to the `inspect.nu` script.
 
-The expression to evaluate and inspect: `$expr`
+- **Expression:** `$expr`
 
-Call `nu_run` with:
+Call `nu_exec` with the following parameters:
 
-```json
-{
-  "pipeline": "$expr | nu ([${CLAUDE_SKILL_DIR} scripts] | path join inspect.nu)"
-  // ...
-}
-```
+- `pipeline` set to `$expr | run inspect.nu [--max-rows=<int>]`
+- `cwd` set to `${CLAUDE_SKILL_DIR}/scripts`
+
+## Usage (`inspect.nu`)
+
+### Input
+
+The script accepts pipeline input and 0 positional arguments.
+
+#### Options
+
+| Flag(s) | Type | Description | Default |
+|---|---|---|---|
+| `-m`, `--max-rows` | `int` | Number of rows to include in the `value` field for `list` and `table` values | `3` |
+
+### Output
 
 This will return a record with the following properties:
 
-- `type`: the nushell type of the expression's result
-- `len`: the length of the expression's result (omitted for non-enumerables)
-- `sample`: a sample of the expression's result (or the result itself for non-enumerables)
+- `type`: the native nushell type the expression's result
+- `length`: the length of the expression's result (omitted for non-enumerables)
+- `value`: the expression's result (or a limited item count of an enumerable)
 
 ## Constraints
 
