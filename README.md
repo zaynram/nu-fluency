@@ -1,87 +1,157 @@
 # nu-fluency
 
-A plugin that helps Claude (and humans) write Nushell idiomatically — not "bash with weird syntax."
-The training distribution heavily over-represents bash and POSIX shell, so the default reach when writing nu is to translate bash patterns instead of using nu's own structural-data-first primitives.
-This plugin counteracts that bias by combining authoritative tooling (`nu-lint`) with educational scaffolding (skills, slash commands, an experimental fallback agent).
+A plugin that helps Claude write [Nushell](https://github.com/nushell/nushell) (`nu`) code idiomatically.
+
+## Background
+
+When first introducing Claude to `nu`, we both agreed that it seemed like an
+LLM's optimal shell with it's natural language semantics and first-class support
+for structured data.
+
+This insight led to the construction of my
+[`nushell-mcp`](https://github.com/zaynram/nushell-mcp).
+
+After testing out the MCP with Claude, he would often treat it as "`bash` with
+weird syntax", which we hypothesize is the result ov POSIX convention being
+over-represented in his training distribution.
+
+This highlighted a need to teach Claude about Nushell and its
+built-in primitives, as the default behavior of reaching for `bash` patterns
+bottlnecked the advantages of `nu` semantics and structured-data support.
+
+This plugin counteracts that bias by combining authoritative tooling (`nu-lint`)
+with educational scaffolding.
 
 ## MCP Server
 
-This plugin consumes an MCP server named `nushell-mcp`, which was authored in-tandem and provides a curated set of Nushell utilities to Claude. See the [package listing](https://www.npmjs.com/package/nushell-mcp) for more information.
+This plugin uses the `nushell-mcp` server, automatically installed
+from it's [NPM package listing](<https://www.npmjs.com/package/nushell-mcp>).
+
+It provides a curated set of `nu` utilities to Claude including but not limited
+to: `nu_exec` (one-shot `nu` pipeline execution) and `nu_repl` (persistent `nu`
+REPL sessions piggybacking off of Nushell's built-in `nu --mcp`).
 
 ## Peer Dependency: Nu-Lint
 
-The commands packaged in this plugin prefer to delegate diagnostics to [`nu-lint`](https://codeberg.org/wvhulle/nu-lint) — a deterministic community linter for Nushell with ~150 rules across `idioms`, `posix`-replacement, `parsing`, `dead-code`, `runtime-errors`, and more.
-Most rules have auto-fixes, and the rules themselves respect the nuance of diverging from the status quo in the age of LLM.
+The commands packaged in this plugin prefer to delegate diagnostics to [`nu-lint`](https://codeberg.org/wvhulle/nu-lint).
 
-Install it:
+`nu-lint` is a deterministic community linter for Nushell with ~150 rules across
+`idioms`, `posix`-replacement, `parsing`, `dead-code`, `runtime-errors`, and more.
+
+Most rules have auto-fixes, and the rules themselves respect the nuance of diverging
+from the status quo in the age of LLM.
+
+### Installation
 
 ```sh
-cargo install nu-lint
+# `--git <url>` - Build from latest source code
+# `--locked` - Ensures compatibility with the Nushell version declared via compatiblity.
+cargo install --git https://codeberg.org/wvhulle/nu-lint --locked
 ```
 
-On Windows with WSL, installing `nu-lint` inside your WSL distribution is supported.
-The plugin's hook auto-detects `wsl.exe` and routes through it.
-
-The hook is silent when `nu-lint` is unavailable, so **the plugin won't error if you skip this step**; you'll just lose out on that deterministic diagnostic surface.
+The hook system is inert by default, and will not warn or error when `nu-lint` is
+unavailable. The only downside is losing out on deterministic diagnostics.
 
 ## Native LSP Integration
 
-`.lsp.json` at the plugin root registers `nu --lsp` as Claude Code's language server for `.nu` files.
-Once the plugin is installed and the language server connects, Claude sees inline diagnostics, hover info, and auto-fixes any time it edits a Nushell file.
-No editor configuration needed — Claude Code handles the LSP protocol end-to-end.
+The plugin declares an LSP configuration with Nushell's built-in language server.
 
-For users editing `.nu` files outside Claude Code, the same `nu --lsp` can be configured to work with most of the common LSP-aware editors.
+```jsonc
+// .claude-plugin/plugin.json
+{
+    // ...
+    "lspServers": {
+        "nushell": {
+            "command": "nu",
+            "args": [
+                "--lsp"
+            ],
+            "extensionToLanguage": {
+                ".nu": "nu",
+                ".nuon": "nu"
+            },
+            "restartOnCrash": true,
+            "maxRestarts": 3
+        }
+    }
+}
+```
 
-It may be of interest to know that, `nu-lint` also has a language server; see the upstream [`nu-lint` README](https://codeberg.org/wvhulle/nu-lint) for editor-specific wiring.
+After plugin installation and the language server connects, Claude sees inline diagnostics,
+hover info, and auto-fixes any time it edits a Nushell file.
 
 ## Components
 
 | Type | Count | Purpose |
 |---|---|---|
-| Skill | 6 | 5 model-only siblings. Pull-on-demand reference. |
-| Commands | 4 | `/nushell-idioms` (entry point), `/inspect-shape` (type information), `/env-snapshot` (read environment variables), `/audit-pipeline` (run diagnostics), `/command-help` (search documentation). |
-| Agents | 1 | **experimental fallback** reviewer for `/nu-audit` when `nu-lint` isn't installed |
+| Skills | 10 | `/nushell-{idioms,records,env-scoping,strings,control-flow,modules}`, `/inspect-shape`, `/env-snapshot`, `/audit-pipeline`, `/command-help` |
+| Agents | 1 | Fallback review agent for `/nu-audit` when `nu-lint` isn't installed (**experimental**) |
 | Hooks | 1 | Post-`nu_exec` hook that runs `nu-lint` on the executed pipeline |
 | LSP | 1 | `nu --lsp` via `.lsp.json` |
 | Configs | 2 | `configs/hook.nu-lint.toml`, `configs/strict.nu-lint.toml` |
 
-## Skills
+### Skills
 
-Only `nushell-idioms` shows up as an invocable command (`/nu-fluency:nushell-idioms`). The five focused siblings are model-only — they auto-load when their topic comes up, without cluttering your slash menu.
+#### User-Invocable
 
-- **`nushell-records`** (model-only) — records, tables, cell paths, `items | where | into record`.
-- **`nushell-env-scoping`** (model-only) — `$env`, `do --env`, `with-env`, `for` vs `each` propagation, automatic env vars.
-- **`nushell-strings`** (model-only) — `parse` templates, `str` namespace, interpolation, `from <format>`.
-- **`nushell-control-flow`** (model-only) — `for`/`each`/`reduce`/`any`/`all`/`take while`, conditionals, `try/catch` vs `?`.
-- **`nushell-modules`** (model-only) — `module`/`use`/`export def`/`export-env`/`main`.
+- **`/nushell-idioms`**
+— (entry point) deep syntax lookup reference
+([`cheat-sheet.md`](skills/nushell-idioms/references/cheat-sheet.md)),
+`bash` → `nu` equivalents, pointers to nu-lint.
+- **`/inspect-shape <expr>`**
+— runs `<expr> | describe` + a sample row through `nu_exec`. Structural intuition.
+- **`/env-snapshot [keys...]`**
+— `$env | select --optional <keys>` with sensible defaults.
+- **`/audit-pipeline <pipeline>`**
+— runs nu-lint (or falls back to the experimental agent if nu-lint isn't installed).
+- **`/command-help <name>`**
+— inline help lookup via `nu_doc_command`.
 
-## Commands (user-invocable)
+#### Model-Only
 
-> Note: The original `commands` are deprecated in favor of `skills` with `user-invocable: true`; the distinction is preserved in this document for clarity of usage.
+- **`nushell-records`**
+— records, tables, cell paths, `items | where | into record`.
+- **`nushell-env-scoping`**
+— `$env`, `do --env`, `with-env`, `for` vs `each` propagation, automatic env vars.
+- **`nushell-strings`**
+— `parse` templates, `str` namespace, interpolation, `from <format>`.
+- **`nushell-control-flow`**
+— `for`/`each`/`reduce`/`any`/`all`/`take while`, conditionals, `try/catch` vs `?`.
+- **`nushell-modules`**
+— `module`/`use`/`export def`/`export-env`/`main`.
 
+### Hooks
 
-- **`/nushell-idioms`** — entry point. Cheat sheet + bash→nu equivalents + pointers to nu-lint. Carries the cheat-sheet reference for deep syntax lookup.
-- **`/inspect-shape <expr>`** — runs `<expr> | describe` + a sample row through `nu_exec`. Structural intuition.
-- **`/env-snapshot [keys...]`** — `$env | select --optional <keys>` with sensible defaults.
-- **`/audit-pipeline <pipeline>`** — runs nu-lint (or falls back to the experimental agent if nu-lint isn't installed).
-- **`/command-help <name>`** — inline help lookup via `nu_doc_command`.
+Post-tool-use hook on MCP `nu_exec` calls.
+Reads the tool's `pipeline` argument from stdin (JSON),
+pipes it through `nu-lint --stdin --format compact` using the narrow
+`configs/hook.nu-lint.toml`, and surfaces findings as a block reason iff
+there are diagnostics surfaced.
 
-## Hook
+The hook config is intentionally conservative
+— `posix`, `idioms`, `parsing` groups only
+— so it fires on bash-translation patterns and skips stylistic noise.
 
-Post-tool-use hook on MCP `nu_exec` calls. Reads the tool's `pipeline` argument from stdin (JSON), pipes it through `nu-lint --stdin --format compact` using the narrow `configs/hook.nu-lint.toml`, and surfaces findings as a block reason if (and only if) there are any. Silent on clean code, silent when nu-lint isn't installed.
+For broader analysis, use `/nu-audit` (which uses the `strict.nu-lint.toml` config).
 
-The hook config is intentionally conservative — `posix`, `idioms`, `parsing` groups only — so it fires on bash-translation patterns and skips stylistic noise. For broader analysis, use `/nu-audit` (which uses the `strict.nu-lint.toml` config).
+## Conventions
 
-## Conventions enforced
+The hook + nu-lint catches most of these mechanically,
+but for completeness they are also enumerated here.
 
-The hook + nu-lint catches most of these mechanically. Worth knowing anyway:
-
-1. When a `let` chain forms, ask whether each step is *carrying state* or *expressing a transform*. Transforms collapse into pipeline stages.
-2. Records are nu's primary data structure. Building one via `reduce` is usually `items | where | into record`.
-3. Env mutations propagate through `for` and `do --env`, not `each`/`items`/`reduce` and not bare `do`.
-4. `?` postfix on cell paths returns null instead of erroring. Prefer it over `try/catch` for safe navigation.
-5. NUON string quoting is context-dependent. Assert via in-nu equality returning bool, not raw NUON comparison.
-6. The last expression in a closure or pipeline is its return value. Don't `print` what you're returning.
+1. When a `let` chain forms, ask whether each step is
+*carrying state* or *expressing a transform*.
+Transforms collapse into pipeline stages.
+2. Records are nu's primary data structure.
+3. Env mutations propagate through `for` loops, `collect --keep-env`, and `do --env`.
+The closures used in `each`/`items`/`reduce` and bare `do`/`collect` do not support
+environment mutations.
+4. Optional access (`<cell-path>?`) postfix on cell paths returns `null`.
+Prefer it over `try/catch` for safe property/nested property access without errors.
+5. NUON string quoting is context-dependent.
+Assert via in-`nu` equality checks, not raw NUON comparison.
+6. The last expression in a closure or pipeline is its return value, akin to `rust`.
+Don't `print` what you're returning.
 
 ## License
 
