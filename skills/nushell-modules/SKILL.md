@@ -2,7 +2,7 @@
 name: nushell-modules
 description: Use when organizing Nushell code into reusable units (e.g. writing a `mod.nu` file, using the `module` keyword), exporting commands (`export def`/`export alias`), creating environment loaders (`export-env`/`source-env`), defining a `main` command for a module or script, importing another module with `use`, or when the user mentions "nu module", "reusable nu code", "export def/alias", "use module", "nu script organization", "main command", or "main subcommands".
 user-invocable: false
-version: 0.1.2
+version: 0.1.3
 compatibility: { nu: '>=0.114.0' }
 ---
 
@@ -182,10 +182,26 @@ to seed environment variables if there are no exported commands.
 - Otherwise, use a wildcard import to seed everything at the same time
 (e.g. `use <file> *`)
 
+## Modules with `nu_exec`
+
+When using the `mcp__nushell__nu_exec` tool, internally it wraps the pipeline
+by a `do {  }` call, writes it to a temporary script file, and invokes it as
+`nu <script> ...<options>`. This inadvertantly inhibits scope introspection and
+any relative paths to the `cwd` in `use` calls will error.
+
+This is a documented limitation in the server, and is an actively tracked issue.
+For now, there are a few methods for using modules with the `nushell-mcp`:
+
+1. Set `const NU_LIB_DIRS = [...]` at the start of the pipeline to include the
+parent directories of any modules or scripts before calling `use`.
+2. Use `nu_repl` instead of `nu_exec`. REPL sessions are not subject to this limitation.
+3. Use absolute paths in any `use` calls, so resolution doesn't depend on the
+script's location.
+
 ## Anti-Patterns
 
 - **Forgetting `export`** — a `def` without `export` is private to the module.
-If the function name does not contain "main", this definition is inaccessible
+If the function name is not "main" or "main <name>", this definition is inaccessible
 across all execution surfaces.
 - **Expecting `namespace CONST` to fetch a constant** — use `$namespace.CONST`
 (record-style) or wildcard-import to get `$CONST`.
