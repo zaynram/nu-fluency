@@ -2,11 +2,22 @@
 
 A plugin that helps Claude write [Nushell](https://github.com/nushell/nushell) (`nu`) code idiomatically.
 
+## Installation
+
+```nu
+# 1. Ensure your Nushell version is compatible
+version | get version # >= 0.114.0
+# 2. Add the plugin marketplace
+claude plugin marketplace add zaynram/code-marketplace
+# 3. Install the `nu-fluency` plugin
+claude plugin install nu-fluency@ramda-code-marketplace
+```
+
 ## Background
 
 When first introducing Claude to `nu`, we both agreed that it seemed like an
-LLM's optimal shell with it's natural language semantics and first-class support
-for structured data.
+LLM's optimal shell; it's natural language semantics and first-class support
+for structured data bridges the gap between human and machine readable data.
 
 This insight led to the construction of my
 [`nushell-mcp`](https://github.com/zaynram/nushell-mcp).
@@ -17,7 +28,7 @@ over-represented in his training distribution.
 
 This highlighted a need to teach Claude about Nushell and its
 built-in primitives, as the default behavior of reaching for `bash` patterns
-bottlnecked the advantages of `nu` semantics and structured-data support.
+bottlenecked the advantages of `nu` semantics and structured-data support.
 
 This plugin counteracts that bias by combining authoritative tooling (`nu-lint`)
 with educational scaffolding.
@@ -25,7 +36,7 @@ with educational scaffolding.
 ## MCP Server
 
 This plugin uses the `nushell-mcp` server, automatically installed
-from it's [NPM package listing](<https://www.npmjs.com/package/nushell-mcp>).
+from its [NPM package listing](<https://www.npmjs.com/package/nushell-mcp>).
 
 It provides a curated set of `nu` utilities to Claude including but not limited
 to: `nu_exec` (one-shot `nu` pipeline execution) and `nu_repl` (persistent `nu`
@@ -45,7 +56,7 @@ from the status quo in the age of LLM.
 
 ```sh
 # `--git <url>` - Build from latest source code
-# `--locked` - Ensures compatibility with the Nushell version declared via compatiblity.
+# `--locked` - Pins the lockfile's dependency versions.
 cargo install --git https://codeberg.org/wvhulle/nu-lint --locked
 ```
 
@@ -85,9 +96,9 @@ hover info, and auto-fixes any time it edits a Nushell file.
 | Type | Count | Purpose |
 |---|---|---|
 | Skills | 10 | `/nushell-{idioms,records,env-scoping,strings,control-flow,modules}`, `/inspect-shape`, `/env-snapshot`, `/audit-pipeline`, `/command-help` |
-| Agents | 1 | Fallback review agent for `/nu-audit` when `nu-lint` isn't installed (**experimental**) |
+| Agents | 1 | Fallback review agent for `/audit-pipeline` when `nu-lint` isn't installed (**experimental**) |
 | Hooks | 1 | Post-`nu_exec` hook that runs `nu-lint` on the executed pipeline |
-| LSP | 1 | `nu --lsp` via `.lsp.json` |
+| LSP | 1 | `nu --lsp` via `lspServers` in `.claude-plugin/plugin.json` |
 | Configs | 2 | `configs/hook.nu-lint.toml`, `configs/strict.nu-lint.toml` |
 
 ### Skills
@@ -105,7 +116,7 @@ hover info, and auto-fixes any time it edits a Nushell file.
 - **`/audit-pipeline <pipeline>`**
 — runs nu-lint (or falls back to the experimental agent if nu-lint isn't installed).
 - **`/command-help <name>`**
-— inline help lookup via `nu_doc_command`.
+— inline help lookup via `nu_doc_help`.
 
 #### Model-Only
 
@@ -132,7 +143,8 @@ The hook config is intentionally conservative
 — `posix`, `idioms`, `parsing` groups only
 — so it fires on bash-translation patterns and skips stylistic noise.
 
-For broader analysis, use `/nu-audit` (which uses the `strict.nu-lint.toml` config).
+For broader analysis, use `/audit-pipeline`
+(which uses the `strict.nu-lint.toml` config).
 
 ## Conventions
 
@@ -143,8 +155,10 @@ but for completeness they are also enumerated here.
 *carrying state* or *expressing a transform*.
 Transforms collapse into pipeline stages.
 2. Records are nu's primary data structure.
-3. Env mutations propagate through `for` loops, `collect --keep-env`, and `do --env`.
-The closures used in `each`/`items`/`reduce` and bare `do`/`collect` do not support
+3. Env mutations propagate through keyword blocks
+(e.g. `for`/`while`/`loop`, `match`, `if`/`else if`/`else`),
+and certain commands with flags (i.e. `collect --keep-env`, and `do --env`).
+The closures used in `each`/`items`/`reduce` and bare `do`/`collect` do not propagate
 environment mutations.
 4. Optional access (`<cell-path>?`) postfix on cell paths returns `null`.
 Prefer it over `try/catch` for safe property/nested property access without errors.
