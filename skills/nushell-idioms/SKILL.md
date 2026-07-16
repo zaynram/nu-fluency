@@ -1,9 +1,8 @@
 ---
 name: nushell-idioms
-when-to-use: This skill should be used when writing, reading, or executing Nushell code. This includes any `.nu` script, the `nu_exec` MCP tool, or pipelines that contain Nushell-specific operators like `$env`, `do --env`, `where`, `each`, or `|` chains with structured data. Potential trigger phrases include 'nushell', 'nu script', 'nu pipeline', 'writing nu', 'calling nu_exec', 'convert this to nu'.
-user-invocable: false
-description: Recalibrates toward idiomatic Nushell instead of bash-translated patterns.
-version: 0.1.0
+user-invocable: true
+description: Educates and reinforces idiomatic Nushell idioms as a knowledge base to avoid writing bash-translated patterns in Nushell code. Use when writing, reading, or executing Nushell code (e.g. a `.nu` script, the `nu_exec`/`nu_repl` MCP tools) and/or when the user mentions 'nushell', 'nu script', 'nu pipeline', 'writing nu', 'calling nu_exec', 'convert this to nu'.
+version: 0.1.1
 ---
 
 # Nushell Idioms
@@ -22,37 +21,9 @@ Native types outside of base primitives (`string`, `int`, etc.) are expansive:
 The biggest source of mistakes when writing nu is reaching for bash patterns.
 
 - Bash uses text-streaming which can cloud intuition about Nushell.
-- Bash dominates training data and is warmed for shell-related operations.
+- Bash dominates training data and surfaces for shell-related operations.
 
 This skill names many common traps and their idiomatic replacements.
-
-## Language Protocols: Nushell LSP and Nu-Lint
-
-The bundled LSP uses the native `nu --lsp` server.
-
-- This provides simple, realtime diagnostics when working on Nushell files.
-
-When available, the `nu-lint` command provides much richer diagnostics.
-
-- This is what the plugin's post-`nu_exec` hook calls when checking a pipeline.
-
-It's a deterministic community-maintained linter with ~150 rules.
-
-Namely, the `posix` rule-group aims to "replace common bash/posix patterns".
-
-- These rules cover a large subset of bash → nu translation traps.
-
-Useful entry points:
-
-- `nu-lint <path>` — lint files in a directory (default `.`)
-- `nu-lint --stdin --format compact` — lint a snippet from stdin, one line per finding
-- `nu-lint --explain <rule>` — full rationale for a specific rule
-- `nu-lint --list` — every available rule, by group
-- `nu-lint --fix <path>` — apply auto-fixes (most rules support this)
-
-The rest of this skill is a recalibration toolkit.
-
-Use it for cases where nu-lint isn't installed or additional information is sought.
 
 ## Self-Prompted Reflection
 
@@ -63,12 +34,16 @@ Internalize asking yourself the following question when composing a Nushell pipe
 - state -> keep the `let`
 - transformation -> collapse into pipeline
 
-Majority of the time, it is a transformation and does not need assignment.
+Majority of the time, it's a transformation and does not need assignment.
 
 Two `let` forms exist and behave differently:
 
-- **Statement form** `let name: TYPE = <expr>` is parse-time. Type annotation is enforced (record/string mismatches reject; lists widen if there's overlap with the annotation).
-- **Pipeline form** `<pipeline> | let name` is runtime. Any `: TYPE` annotation is cosmetic — the binding takes the pipeline's actual type; no typecheck runs. Reach for it when binding a name mid-stream is genuinely useful; do not reach for it to "check the shape of a value at runtime".
+- **Statement form** `let name: TYPE = <expr>` is parse-time.
+Enforced type annotations (record/string mismatches reject).
+- **Pipeline form** `<pipeline> | let name` is runtime.
+Enforcement of type annotations in this form is subject to the configured
+experimental options and Nushell version
+(0.113.x ignores by default; 0.114.x enforces by default).
 
 ## Bash to Nushell Equivalents
 
@@ -85,7 +60,7 @@ Two `let` forms exist and behave differently:
 | `[[ -n "$x" ]]` | `($x \| is-not-empty)` |
 | `if [[ "$x" == "y" ]]; then …; fi` | `if $x == "y" { … }` |
 | `read -r line` | (rare; nu is non-interactive by default in scripts) |
-| `printf "%s\n" "${arr[@]}"` | `$arr \| each { print $in }` (but usually you just want `$arr`) |
+| `printf "%s\n" "${arr[@]}"` | `$arr \| each { print $in }` (rare; most times `$arr` suffices) |
 | `cmd 2>/dev/null` | `cmd e>\| ignore` (drop stderr); `cmd \| complete` to capture both for inspection |
 | `set -e` | (built-in; pipelines stop on first error unless `try` wraps) |
 
@@ -171,12 +146,10 @@ These are all correct and intentional:
 
 The last expression of a closure or pipeline **always** returns a value.
 
-There is little reason to use the `return` keyword outside of early exits.
+The `return` keyword has few valid uses cases outside of early closure exits.
 
-There is almost no reason to use the `echo` keyword, ever.
-
-- Nushell's built in `echo` does not print to `stdout`, it _returns_ the value.
-- `'some string'` is equivalent to `echo some string`
+The `echo` command has almost 0 valid use cases, as it merely _returns_ the arguments
+and does not print them to stdout, which is the default behavior without `echo`.
 
 2. **Contextual Strings**
 
@@ -185,9 +158,9 @@ Strings in the starting position of an expression are always _invoked_.
 - `whoami` => `<username>`
 - `/usr/bin/whoami` => `<username>`
 
-Nushell parses tokens, so most strings can be provided as arguments without quotes.
+Nushell parses tokens, so most strings can inlined as arguments without quotes.
 
-Strings with whitespace that are to be treated as one argument still requires quotes.
+Strings with whitespace that require treatment as one argument still requires quotes.
 
 - `cd example/path` is valid
 - `cd 'example/path with whitespace'` is valid
@@ -200,13 +173,13 @@ Function signatures can specify an argument's type as `path`.
 Function signatures can also specify an argument's type as `glob`.
 
 - Unlike `path`, `glob` values piped to `describe` will return `glob`.
-- Conversion to `glob` is supported by `into glob`.
-- Conversion from `glob` is supported by `into string`.
+- Conversion to `glob` supported by `into glob`.
+- Conversion from `glob` supported by `into string`.
 - The built in `ls` command uses a `glob` argument signature.
 
 Path and glob arguments do not require quotations, unless they contain whitespace.
 
-- `ls foo/bar` is valid and equivalent to `ls "foo/bar"`
+- `ls foo/bar` is valid and the same as `ls "foo/bar"`
 - The same follows for `ls foo/**/*`
 
 Records, tables, and lists treat unparenthesized tokens as strings.
@@ -218,60 +191,51 @@ The quotation character used influences the parsing behavior.
 
 - Double-quotes allows backslash-escaping:
   - `"\n"` => `<newline>`
-- Single-quotes are treated as literal strings:
+- Single-quotes parse as literal strings:
   - `'\n'` => `\n`
 - This behavior also applies to string interpolation.
 
 Interpolation uses parentheses and a distinct convention that differs from bash.
 
-- Interpolated strings are prefixed with `$` and may use double or single quotes.
-- Subexpressions are used for evaluated values; bracketed expansion is unsupported.
-  - `$"hello ($env.USER)"` is the Nushell equivalent of `echo "hello ${USER}"`
+- Syntax uses either double or single quotes prefixed with `$`.
+- Only subexpressions produce evaluated values (no bracketed expansion).
+  - `$"hello ($env.USER)"` in `nu` = `echo "hello ${USER}"` in `bash`
 
 3. **Environment Mutation**
 
-Environment mutations are made through direct assignments on `$env` or with `load-env`.
+Environment mutations propgate automatically through direct assignments
+on `$env` or with `load-env`, _within_ their enclosing scope.
 
 ```nu
 $env.x = 'assigned'
-$env.x # assigned
+load-env {y: loaded}
+$env | get x y | str join , # assigned,loaded
 ```
+
+Construct temporary environments and run a closure via the `with-env` command.
 
 ```nu
-load-env {x: loaded}
-$env.x # loaded
+$env.ABC? # null
+with-env {ABC: 123} { $env.ABC } # 123
 ```
 
-Temporary environments may be used through the `with-env` command.
+See [`nushell-env-scoping`](../nushell-env-scoping/SKILL.md) for more information.
 
-```nu
-with-env {x: temporary} { $env.x } # temporary
-```
+## Shape Verification
 
-By default, closures and functions do not persist enviornment changes.
+When uncertain what a value's shape is mid-pipeline, measure instead of guessing:
 
-- Use the `--env` flag to propagate environment changes.
-
-  ```nu
-  def --env call [] { $env.called = true }
-  $env.called? # null
-  call
-  $env.called? # true
-  ```
-
-  ```nu
-  let env_sum: closure = {|a: int, b: int| load-env {sum: ($a + $b)} }
-  $env.sum? # null
-  do --env $env_sum 3 7
-  $env.sum? # 10
-
-  ```
+- Read the `[result type: ...]` footer on every `nu_exec` result first.
+- `<expr> | describe --detailed` → type, detailed type, and length.
+- `<expr> | columns` → field names of a record/table row.
+- Default to using safe access methods (e.g. `value.property?`)
+when chaining further operations onto a value whose shape not directly observed.
 
 ## Sibling Skills
 
 This skill may not cover the full extent of any inquiry or composition.
 
-The following mapping can be used to compound relevant sibling skills:
+Use the mapping below to compound relevant sibling skills:
 
 [`nushell-records`](../nushell-records/SKILL.md)
 
@@ -297,8 +261,36 @@ The following mapping can be used to compound relevant sibling skills:
 
 [cheat sheet](./references/cheat-sheet.md)
 
-- Syntax-dense quick reference with annotated examples and inline-comment results for every primitive, plus sections on conversions, records, lists, tables, strings, filesystem, env and scope, variables, control flow, custom commands, modules, and cross-cutting flags.
-- Each section that has a matching sibling skill links back to it as the conceptual reference.
+- Syntax-dense quick reference with annotated examples and inline-comment results
+for every primitive, plus sections on conversions, records, lists, tables, strings,
+filesystem, env and scope, variables, control flow, custom commands, modules,
+and cross-cutting flags.
+- Each section that has a matching sibling skill links back to it as
+the conceptual reference.
+
+## Language Protocols: Nushell LSP and Nu-Lint
+
+The bundled LSP uses the native `nu --lsp` server.
+
+- This provides simple, realtime diagnostics when working on Nushell files.
+
+When available, the `nu-lint` command provides much richer diagnostics.
+
+- This is what the plugin's post-`nu_exec` hook calls when checking a pipeline.
+
+It's a deterministic community-maintained linter with ~150 rules.
+
+Namely, the `posix` rule-group aims to "replace common bash/posix patterns".
+
+- These rules cover a large subset of bash → nu translation traps.
+
+Useful entry points:
+
+- `nu-lint <path>` — lint files in a directory (default `.`)
+- `nu-lint --stdin --format compact` — lint a snippet from stdin, one line per finding
+- `nu-lint --explain <rule>` — full rationale for a specific rule
+- `nu-lint --list` — every available rule, by group
+- `nu-lint --fix <path>` — apply auto-fixes (most rules support this)
 
 ## Constraints
 
