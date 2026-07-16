@@ -1,6 +1,6 @@
 ---
 name: nushell-idioms
-when-to-use: This skill should be used when writing, reading, or executing Nushell code. This includes any `.nu` script, the `nu_run` MCP tool, or pipelines that contain Nushell-specific operators like `$env`, `do --env`, `where`, `each`, or `|` chains with structured data. Potential trigger phrases include 'nushell', 'nu script', 'nu pipeline', 'writing nu', 'calling nu_run', 'convert this to nu'.
+when-to-use: This skill should be used when writing, reading, or executing Nushell code. This includes any `.nu` script, the `nu_exec` MCP tool, or pipelines that contain Nushell-specific operators like `$env`, `do --env`, `where`, `each`, or `|` chains with structured data. Potential trigger phrases include 'nushell', 'nu script', 'nu pipeline', 'writing nu', 'calling nu_exec', 'convert this to nu'.
 user-invocable: false
 description: Recalibrates toward idiomatic Nushell instead of bash-translated patterns.
 version: 0.1.0
@@ -34,7 +34,7 @@ The bundled LSP uses the native `nu --lsp` server.
 
 When available, the `nu-lint` command provides much richer diagnostics.
 
-- This is what the plugin's post-`nu_run` hook calls when checking a pipeline.
+- This is what the plugin's post-`nu_exec` hook calls when checking a pipeline.
 
 It's a deterministic community-maintained linter with ~150 rules.
 

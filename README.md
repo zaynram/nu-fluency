@@ -1,7 +1,7 @@
 # nu-fluency
 
-A plugin that helps Claude (and humans) write Nushell idiomatically — not "bash with weird syntax." 
-The training distribution heavily over-represents bash and POSIX shell, so the default reach when writing nu is to translate bash patterns instead of using nu's own structural-data-first primitives. 
+A plugin that helps Claude (and humans) write Nushell idiomatically — not "bash with weird syntax."
+The training distribution heavily over-represents bash and POSIX shell, so the default reach when writing nu is to translate bash patterns instead of using nu's own structural-data-first primitives.
 This plugin counteracts that bias by combining authoritative tooling (`nu-lint`) with educational scaffolding (skills, slash commands, an experimental fallback agent).
 
 ## MCP Server
@@ -10,7 +10,7 @@ This plugin consumes an MCP server named `nushell-mcp`, which was authored in-ta
 
 ## Peer Dependency: Nu-Lint
 
-The commands packaged in this plugin prefer to delegate diagnostics to [`nu-lint`](https://codeberg.org/wvhulle/nu-lint) — a deterministic community linter for Nushell with ~150 rules across `idioms`, `posix`-replacement, `parsing`, `dead-code`, `runtime-errors`, and more. 
+The commands packaged in this plugin prefer to delegate diagnostics to [`nu-lint`](https://codeberg.org/wvhulle/nu-lint) — a deterministic community linter for Nushell with ~150 rules across `idioms`, `posix`-replacement, `parsing`, `dead-code`, `runtime-errors`, and more.
 Most rules have auto-fixes, and the rules themselves respect the nuance of diverging from the status quo in the age of LLM.
 
 Install it:
@@ -19,7 +19,7 @@ Install it:
 cargo install nu-lint
 ```
 
-On Windows with WSL, installing `nu-lint` inside your WSL distribution is supported. 
+On Windows with WSL, installing `nu-lint` inside your WSL distribution is supported.
 The plugin's hook auto-detects `wsl.exe` and routes through it.
 
 The hook is silent when `nu-lint` is unavailable, so **the plugin won't error if you skip this step**; you'll just lose out on that deterministic diagnostic surface.
@@ -27,7 +27,7 @@ The hook is silent when `nu-lint` is unavailable, so **the plugin won't error if
 ## Native LSP Integration
 
 `.lsp.json` at the plugin root registers `nu --lsp` as Claude Code's language server for `.nu` files.
-Once the plugin is installed and the language server connects, Claude sees inline diagnostics, hover info, and auto-fixes any time it edits a Nushell file. 
+Once the plugin is installed and the language server connects, Claude sees inline diagnostics, hover info, and auto-fixes any time it edits a Nushell file.
 No editor configuration needed — Claude Code handles the LSP protocol end-to-end.
 
 For users editing `.nu` files outside Claude Code, the same `nu --lsp` can be configured to work with most of the common LSP-aware editors.
@@ -61,14 +61,14 @@ Only `nushell-idioms` shows up as an invocable command (`/nu-fluency:nushell-idi
 
 
 - **`/nushell-idioms`** — entry point. Cheat sheet + bash→nu equivalents + pointers to nu-lint. Carries the cheat-sheet reference for deep syntax lookup.
-- **`/inspect-shape <expr>`** — runs `<expr> | describe` + a sample row through `nu_run`. Structural intuition.
+- **`/inspect-shape <expr>`** — runs `<expr> | describe` + a sample row through `nu_exec`. Structural intuition.
 - **`/env-snapshot [keys...]`** — `$env | select --optional <keys>` with sensible defaults.
 - **`/audit-pipeline <pipeline>`** — runs nu-lint (or falls back to the experimental agent if nu-lint isn't installed).
 - **`/command-help <name>`** — inline help lookup via `nu_doc_command`.
 
 ## Hook
 
-Post-tool-use hook on MCP `nu_run` calls. Reads the tool's `pipeline` argument from stdin (JSON), pipes it through `nu-lint --stdin --format compact` using the narrow `configs/hook.nu-lint.toml`, and surfaces findings as a block reason if (and only if) there are any. Silent on clean code, silent when nu-lint isn't installed.
+Post-tool-use hook on MCP `nu_exec` calls. Reads the tool's `pipeline` argument from stdin (JSON), pipes it through `nu-lint --stdin --format compact` using the narrow `configs/hook.nu-lint.toml`, and surfaces findings as a block reason if (and only if) there are any. Silent on clean code, silent when nu-lint isn't installed.
 
 The hook config is intentionally conservative — `posix`, `idioms`, `parsing` groups only — so it fires on bash-translation patterns and skips stylistic noise. For broader analysis, use `/nu-audit` (which uses the `strict.nu-lint.toml` config).
 

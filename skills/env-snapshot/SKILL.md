@@ -1,16 +1,16 @@
 ---
 name: env-snapshot
-description: Snapshot values from the nushell environment for the provided keys as a record. If no keys are provided, a default set is substituted.
+description: Snapshot values from the nushell environment for the provided keys as a record. Keys are optional; substitute the default set if omitted.
 user-invocable: true
 argument-hint: [<...keys>]
-allowed-tools: ["mcp__nushell__nu_run"]
+allowed-tools: ["mcp__nushell__nu_exec"]
 ---
 
 # Env Snapshot
 
 ## Procedure
 
-Call `nu_run` with the following template as pipeline input:
+Call `nu_exec` with the following template as pipeline input:
 
 ```json
 {
@@ -28,7 +28,7 @@ Substitute `<keys>` respective to the user-provided arguments as follows:
 
 `<keys>` => `HOME PATH USER PWD SHELL NU_VERSION NU_LIB_DIRS NU_PLUGIN_DIRS`
 
-The `nu_run` call will return a record containing the corresponding key-value pairs.
+The `nu_exec` call will return a record containing the corresponding key-value pairs.
 
 ## Constraints
 
