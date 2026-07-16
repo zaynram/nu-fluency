@@ -12,7 +12,7 @@ This insight led to the construction of my
 [`nushell-mcp`](https://github.com/zaynram/nushell-mcp).
 
 After testing out the MCP with Claude, he would often treat it as "`bash` with
-weird syntax", which we hypothesize is the result ov POSIX convention being
+weird syntax", which we hypothesize is the result of POSIX convention being
 over-represented in his training distribution.
 
 This highlighted a need to teach Claude about Nushell and its
