@@ -1,7 +1,7 @@
 ---
 name: inspect-shape
 description: Inspect the structure of a `nu` expression and return the data's described type, it's length (if applicable), and the value itself.
-user-invocable: true
+user-invocable: false
 argument-hint: [<expression>]
 arguments: [expr]
 allowed-tools: ["mcp__nushell__nu_exec"]
