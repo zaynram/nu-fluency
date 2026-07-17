@@ -25,13 +25,11 @@ The pipeline to review: `$pipeline`
 
 2. If `nu-lint` is available:
 
-Write the pipeline to a temp `.nu` file and run the linter:
+Run the linter with the pipeline piped in as a raw string:
 
 ```nu
-let cfg = `${CLAUDE_PLUGIN_ROOT}` | path join configs strict.nu-lint.toml
-let tmp = mktemp --suffix .nu
-'$pipeline' | save --force $tmp
-nu-lint --format compact -c $cfg $tmp
+let config: path = `${CLAUDE_PLUGIN_ROOT}` | path join configs strict.nu-lint.toml
+r#'$pipeline'# | nu-lint --stdin --format=compact --config=$config
 ```
 
 Render the diagnostics directly, one per line, with line/column references.
