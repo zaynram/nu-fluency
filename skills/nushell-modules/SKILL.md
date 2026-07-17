@@ -46,7 +46,7 @@ namespace name, or as bare `$NAME` after a wildcard import.
 `use` is **parse-time**. The path must be a string literal or a const
 — you cannot import based on a runtime value.
 
-- Certain commands resolve during parse time, (e.g. `path join`, `path expand`)
+- Certain commands resolve during parse time (e.g. `path join`, `path expand`)
 which provides limited flexibility to scripts/modules to import other modules
 by assigning the `NU_LIB_DIRS` constant to an array of directories to include
 at parse time when resolving imports.
@@ -98,7 +98,7 @@ or using either the `nu` binary or the `run` built-in command.
 > Executable scripts that read from stdin require the shebang
 `#!/usr/bin/env -S nu --stdin` (-S required for flags with `env`)
 
-Subcommands definitions depend on the execution surface (script vs. module).
+Subcommand definitions depend on the execution surface (script vs. module).
 
 - For scripts, prefix subcommands with `main` (e.g. `def "main bar"`).
 - For modules, export subcommands without a prefix (e.g. `export def bar`).
@@ -186,7 +186,7 @@ to seed environment variables if there are no exported commands.
 
 When using the `mcp__nushell__nu_exec` tool, internally it wraps the pipeline
 by a `do {  }` call, writes it to a temporary script file, and invokes it as
-`nu <script> ...<options>`. This inadvertantly inhibits scope introspection and
+`nu <script> ...<options>`. This inadvertently inhibits scope introspection and
 any relative paths to the `cwd` in `use` calls will error.
 
 This is a documented limitation in the server, and is an actively tracked issue.
