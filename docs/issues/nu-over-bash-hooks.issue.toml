@@ -1,0 +1,79 @@
+version = '3.0.0'
+
+[issue]
+  name   = 'Nu-over-Bash Hooks (Slot C)'
+  slug   = 'nu-over-bash-hooks'
+  date   = 2026-07-20
+  status = 'draft'
+
+  [issue.vision]
+    outcome = 'singular'
+
+    [[issue.vision.output]]
+      purpose = 'encourage-nu-over-bash PreToolUse hook.'
+      path    = 'per hooks-placement decision'
+
+    [[issue.vision.output]]
+      purpose = 'thinking-in-nu lint-warn integration.'
+      path    = 'per hooks-placement decision'
+
+    [issue.vision.criteria]
+      requirements = [
+        'PreToolUse hook nudges toward nu for shell tasks without blocking bash outright.',
+        'Lint-warn path exercises nu-lint where available.',
+      ]
+      constraints  = [
+        'Sequenced strictly after hooks-placement.',
+      ]
+
+    [issue.vision.landscape]
+      internal = [
+        {
+          synopsis = 'First hooks shipped by the plugin.',
+          type     = 'greenfield'
+        },
+      ]
+
+      [issue.vision.landscape.external]
+        [issue.vision.landscape.external.nu-lint-availability]
+          verified = 'Debian /usr/bin and Windows via nu-lint.exe with PATHEXT, 2026-07-16.'
+
+  [issue.bindings]
+    [[issue.bindings.xvalue]]
+      type = 'practice-fidelity'
+      item = 'Encodes the nu-over-bash preference as live tooling pressure instead of documentation the agent may not read.'
+
+[issue.reference]
+url = "https://github.com/zaynram/nu-fluency/issues/6"
+branch = "nu-over-bash-hooks"
+index = 6
+
+    [issue.vision.scope]
+      excluded = [
+        { item = 'Placement decision', deferred = 'hooks-placement' },
+      ]
+
+[tasks]
+  [tasks.1]
+    id        = 'pretooluse-hook'
+    target    = 'PreToolUse nudge hook implemented per placement.'
+    completed = false
+    subtasks  = [
+      {
+        synopsis = 'Implement encourage-nu-over-bash hook',
+        llm      = 'augmentation',
+        done     = false
+      },
+    ]
+
+  [tasks.2]
+    id        = 'lint-warn'
+    target    = 'thinking-in-nu lint-warn path integrated.'
+    completed = false
+    subtasks  = [
+      {
+        synopsis = 'Wire nu-lint warn path',
+        llm      = 'augmentation',
+        done     = false
+      },
+    ]

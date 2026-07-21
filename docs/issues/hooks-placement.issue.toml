@@ -1,0 +1,63 @@
+version = '3.0.0'
+
+[issue]
+  name   = 'Hooks Placement Decision'
+  slug   = 'hooks-placement'
+  date   = 2026-07-20
+  status = 'draft'
+
+  [issue.vision]
+    outcome = 'singular'
+
+    [[issue.vision.output]]
+      purpose = 'Recorded decision: plugin-level hooks.json versus skill-scoped frontmatter.'
+      path    = 'docs/decisions/'
+
+    [issue.vision.criteria]
+      requirements = [
+        'A definite stance with rationale, recorded where future contributors will find it.',
+      ]
+      constraints  = [
+        'Gates nu-over-bash-hooks; no hook implementation before this freezes.',
+        'Decision class is author-owned (manual).',
+      ]
+
+    [[issue.vision.scope.excluded]]
+      item     = 'Hook implementation'
+      deferred = 'nu-over-bash-hooks'
+
+  [issue.bindings]
+    [[issue.bindings.xvalue]]
+      type = 'sequencing-integrity'
+      item = 'Freezing placement before implementation prevents rework across every future hook the plugin ships.'
+
+[issue.reference]
+url = "https://github.com/zaynram/nu-fluency/issues/5"
+branch = "hooks-placement"
+index = 5
+
+    [issue.vision.landscape]
+      internal = [
+        {
+          type     = 'greenfield',
+          synopsis = 'No hooks shipped yet; placement undecided.'
+        },
+      ]
+
+[tasks]
+  [tasks.1]
+    id        = 'decide-placement'
+    target    = 'Placement decision frozen with rationale.'
+    completed = false
+    subtasks  = [
+      {
+        synopsis = 'Weigh hooks.json vs frontmatter',
+        llm      = 'augmentation',
+        done     = false
+      },
+      {
+        synopsis = 'Record decision with rationale',
+        llm      = 'none',
+        done     = false
+      },
+    ]

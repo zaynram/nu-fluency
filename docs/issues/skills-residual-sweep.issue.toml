@@ -1,0 +1,96 @@
+version = '3.0.0'
+
+[issue]
+  name   = 'Skills Residual Sweep'
+  slug   = 'skills-residual-sweep'
+  date   = 2026-07-20
+  status = 'draft'
+
+  [issue.vision]
+    outcome = 'singular'
+
+    [[issue.vision.output]]
+      purpose = 'records: ignore-errors deprecation reflected.'
+      path    = 'skills/nushell-records/SKILL.md'
+
+    [[issue.vision.output]]
+      purpose = 'strings: JS-NUON section excised.'
+      path    = 'skills/nushell-strings/SKILL.md'
+
+    [[issue.vision.output]]
+      purpose = 'env-scoping: persistence demoted, 0.111 pin noted, closure scope-blindness pitfall added.'
+      path    = 'skills/nushell-env-scoping/SKILL.md'
+
+    [[issue.vision.output]]
+      purpose = 'control-flow: content confirmed current.'
+      path    = 'skills/nushell-control-flow/SKILL.md'
+
+    [issue.vision.criteria]
+      requirements = [
+        'Each listed edit lands in its skill.',
+        'Scope-blindness pitfall placement in env-scoping is settled and not re-litigated.',
+      ]
+      constraints  = [
+        'Some edits may already exist within the 17 pushed commits; verify before duplicating.',
+      ]
+
+  [issue.bindings]
+    [[issue.bindings.xvalue]]
+      type = 'skill-fidelity'
+      item = 'Sweeps the four core-language skills to current nu semantics so 0.4.0 ships without known-stale guidance.'
+
+[issue.reference]
+url = "https://github.com/zaynram/nu-fluency/issues/7"
+branch = "skills-residual-sweep"
+index = 7
+
+    [issue.vision.scope]
+      excluded = [
+        {
+          item     = 'New skill content beyond listed edits',
+          deferred = false
+        },
+      ]
+
+    [issue.vision.landscape]
+      internal = [
+        {
+          type            = 'brownfield',
+          synopsis        = 'Four core-language skills with known-stale guidance.',
+          reference       = 'skills/',
+          incompatibility = 'Guidance drifted from current nu semantics on 0.114.'
+        },
+      ]
+
+[tasks]
+  [tasks.1]
+    id        = 'per-skill-edits'
+    target    = 'All four skill edits landed or confirmed present.'
+    completed = false
+    subtasks  = [
+      {
+        synopsis = 'Verify edits absent from the 17 commits',
+        llm      = 'automation',
+        done     = false
+      },
+      {
+        synopsis = 'records: ignore-errors deprecation',
+        llm      = 'augmentation',
+        done     = false
+      },
+      {
+        synopsis = 'strings: excise JS-NUON',
+        llm      = 'automation',
+        done     = false
+      },
+      {
+        synopsis = 'env-scoping: demote persistence, pin, pitfall',
+        llm      = 'augmentation',
+        done     = false
+      },
+      {
+        synopsis = 'control-flow: confirm current',
+        llm      = 'augmentation',
+        done     = false
+      },
+    ]

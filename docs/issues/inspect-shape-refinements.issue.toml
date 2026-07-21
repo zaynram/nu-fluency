@@ -1,0 +1,106 @@
+version = '3.0.0'
+
+[issue]
+  name   = 'Inspect Shape Refinements'
+  slug   = 'inspect-shape-refinements'
+  date   = 2026-07-20
+  status = 'draft'
+
+  [issue.vision]
+    outcome = 'singular'
+
+    [[issue.vision.output]]
+      purpose = 'Skill description documenting both invocation triggers.'
+      path    = 'skills/inspect-shape/SKILL.md'
+
+    [[issue.vision.output]]
+      purpose = 'Cleaned inspection script with dead paths removed.'
+      path    = 'skills/inspect-shape/'
+
+    [issue.vision.criteria]
+      requirements = [
+        'Dual-invocable behavior confirmed and both triggers stated in the description.',
+        'EMPTY sample field removed; unused PRIMITIVES excised; dead nothing arm removed; duplicate closure handling unified.',
+        'nu>=0.114 requirement noted.',
+      ]
+      constraints  = [
+        'Uncommitted local changes exist on this skill; reconcile before new edits.',
+      ]
+
+  [issue.bindings]
+    [[issue.bindings.xvalue]]
+      type = 'skill-fidelity'
+      item = 'Removes dead paths and stale fields so the shipped skill matches its actual behavior, keeping the 0.4.0 corpus trustworthy.'
+
+[issue.reference]
+url = "https://github.com/zaynram/nu-fluency/issues/3"
+branch = "inspect-shape-refinements"
+index = 3
+
+    [issue.vision.scope]
+      excluded = [
+        {
+          item     = 'Behavioral changes to inspection output',
+          deferred = false
+        },
+      ]
+
+    [issue.vision.landscape]
+      internal = [
+        {
+          type            = 'brownfield',
+          synopsis        = 'Existing inspect-shape skill and script.',
+          reference       = 'skills/inspect-shape/',
+          incompatibility = 'Stale fields and dead paths contradict actual behavior.'
+        },
+      ]
+
+[tasks]
+  [tasks.1]
+    id        = 'confirm-dual-invocable'
+    target    = 'Dual invocation confirmed and documented.'
+    completed = false
+    subtasks  = [
+      {
+        synopsis = 'Confirm dual-invocable behavior',
+        llm      = 'none',
+        done     = false
+      },
+      {
+        synopsis = 'State both triggers in description',
+        llm      = 'augmentation',
+        done     = false
+      },
+    ]
+
+  [tasks.2]
+    id        = 'script-cleanup'
+    target    = 'Inspection script cleaned of dead paths.'
+    completed = false
+    subtasks  = [
+      {
+        synopsis = 'Remove EMPTY sample field',
+        llm      = 'automation',
+        done     = false
+      },
+      {
+        synopsis = 'Excise unused PRIMITIVES',
+        llm      = 'automation',
+        done     = false
+      },
+      {
+        synopsis = 'Remove dead nothing arm',
+        llm      = 'automation',
+        done     = false
+      },
+      {
+        synopsis = 'Unify duplicate closure handling',
+        llm      = 'augmentation',
+        done     = false
+      },
+      {
+        synopsis = 'Note nu>=0.114 requirement',
+        llm      = 'automation',
+        done     = false
+      },
+    ]

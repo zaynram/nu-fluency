@@ -1,0 +1,95 @@
+version = '3.0.0'
+
+[issue]
+  name   = 'v0.4.0 Stable Close-Out'
+  slug   = 'v0-4-0-close-out'
+  date   = 2026-07-20
+  status = 'draft'
+
+  [issue.vision]
+    outcome = 'singular'
+
+    [[issue.vision.output]]
+      purpose = 'Trigger round-trip tests passing.'
+      path    = 'tests/'
+
+    [[issue.vision.output]]
+      purpose = 'Vale pass over all SKILL.md prose.'
+      path    = 'skills/'
+
+    [[issue.vision.output]]
+      purpose = 'Version sweep, v0.4.0 stable tag and release.'
+      path    = './'
+
+    [[issue.vision.output]]
+      purpose = 'Both marketplace manifests bumped in the same motion.'
+      path    = 'marketplace manifests'
+
+    [issue.vision.criteria]
+      requirements = [
+        'Round-trip trigger tests green.',
+        'markdown-toolkit-vale clean over all SKILL.md prose.',
+        'Versions coherent across corpus and manifests.',
+        'Stable tag pushed with release; both manifests bumped atomically to converge cached installs.',
+      ]
+      constraints  = [
+        'Sequenced last; gates on all other 0.4.0 residual issues.',
+      ]
+
+  [issue.bindings]
+    [[issue.bindings.xvalue]]
+      type = 'release-integrity'
+      item = 'A single audited close-out motion converts seventeen commits of refinement into a stable anchor consumers can pin.'
+
+[issue.reference]
+url = "https://github.com/zaynram/nu-fluency/issues/8"
+branch = "v0-4-0-close-out"
+index = 8
+
+    [issue.vision.scope]
+      excluded = [
+        { item = 'New feature work', deferred = false },
+      ]
+
+    [issue.vision.landscape]
+      internal = [
+        {
+          type            = 'brownfield',
+          synopsis        = 'Alpha-tagged corpus awaiting stable anchor.',
+          reference       = './',
+          incompatibility = 'Cached installs diverge until both manifests bump on a stable tag.'
+        },
+      ]
+
+[tasks]
+  [tasks.1]
+    id        = 'verify-and-release'
+    target    = 'Stable release shipped from a verified corpus.'
+    completed = false
+    subtasks  = [
+      {
+        synopsis = 'Run trigger round-trip tests',
+        llm      = 'automation',
+        done     = false
+      },
+      {
+        synopsis = 'Run vale over SKILL.md prose',
+        llm      = 'automation',
+        done     = false
+      },
+      {
+        synopsis = 'Sweep versions for coherence',
+        llm      = 'augmentation',
+        done     = false
+      },
+      {
+        synopsis = 'Tag and release v0.4.0',
+        llm      = 'none',
+        done     = false
+      },
+      {
+        synopsis = 'Bump both manifests same motion',
+        llm      = 'none',
+        done     = false
+      },
+    ]

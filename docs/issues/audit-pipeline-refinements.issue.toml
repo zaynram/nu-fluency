@@ -1,0 +1,75 @@
+version = '3.0.0'
+
+[issue]
+  name   = 'Audit Pipeline Refinements'
+  slug   = 'audit-pipeline-refinements'
+  date   = 2026-07-20
+  status = 'draft'
+
+  [issue.vision]
+    outcome = 'singular'
+
+    [[issue.vision.output]]
+      purpose = 'Renumbered steps with template-substitution annotation and boundary sentence.'
+      path    = 'skills/audit-pipeline/SKILL.md'
+
+    [issue.vision.criteria]
+      requirements = [
+        'Step numbering corrected end-to-end.',
+        'Template-substitution behavior annotated where it occurs.',
+        'Hook-vs-command boundary sentence added.',
+      ]
+      constraints  = [
+        'Uncommitted local changes exist on this skill; reconcile before new edits.',
+      ]
+
+  [issue.bindings]
+    [[issue.bindings.xvalue]]
+      type = 'skill-fidelity'
+      item = 'Aligns the audit skill prose with its execution reality so the audit surface teaches the boundary it enforces.'
+
+[issue.reference]
+url = "https://github.com/zaynram/nu-fluency/issues/4"
+branch = "audit-pipeline-refinements"
+index = 4
+
+    [issue.vision.scope]
+      excluded = [
+        {
+          item     = 'Hook implementation',
+          deferred = 'nu-over-bash-hooks'
+        },
+      ]
+
+    [issue.vision.landscape]
+      internal = [
+        {
+          type            = 'brownfield',
+          synopsis        = 'Existing audit-pipeline skill prose.',
+          reference       = 'skills/audit-pipeline/',
+          incompatibility = 'Numbering and annotations drifted from execution reality.'
+        },
+      ]
+
+[tasks]
+  [tasks.1]
+    id        = 'prose-refinements'
+    target    = 'Skill prose corrected and annotated.'
+    completed = false
+    subtasks  = [
+      {
+        synopsis = 'Correct step numbering',
+        llm      = 'automation',
+        done     = false
+      },
+      {
+        synopsis = 'Annotate template substitution',
+        llm      = 'augmentation',
+        done     = false
+      },
+      {
+        synopsis = 'Add hook-vs-command boundary sentence',
+        llm      = 'none',
+        done     = false
+      },
+    ]
