@@ -9,6 +9,10 @@ shell: bash
 
 # Audit Pipeline
 
+The `!`-executed probes and `$expression` substitution below run once at
+invocation, like a slash command's preprocessing — this is not a recurring
+hook.
+
 ## Environment
 
 - Nushell version: !`nu --version`
@@ -25,32 +29,29 @@ Else, follow the [fallback](#fallback) instructions.
 
 ## Procedure
 
-Run the linter with the pipeline.
+1. Run the linter with the pipeline.
 
-```bash
-CONFIG="${CLAUDE_PLUGIN_ROOT}/configs/strict.nu-lint.toml"
-# $expression is substituted by Claude Code before bash runs this block;
-# the quoted heredoc (<<'EOF') deliberately suppresses bash's own expansion
-# so the substituted Nushell code reaches nu-lint unmodified.
-echo "$(cat <<'EOF'
-$expression
-EOF
-)" | nu-lint --stdin --format compact --config "$CONFIG"
-```
+   ```bash
+   CONFIG="${CLAUDE_PLUGIN_ROOT}/configs/strict.nu-lint.toml"
+   # quoted heredoc (<<'PIPELINE') stops bash from expanding the substituted pipeline as shell syntax
+   echo "$(cat <<'PIPELINE'
+   $expression
+   PIPELINE
+   )" | nu-lint --stdin --format compact --config "$CONFIG"
+   ```
+
+2. Render the diagnostics directly, one per line, with line/column references.
 
 ## Fallback
 
-Invoke the [`generate-diagnostics`](../../agents/generate-diagnostics.md) Task agent.
-
-Prepend a one-line caveat to your output indicating the diminished integrity.
-
-Report your findings in a neat, organized fashion.
+1. Invoke the [`generate-diagnostics`](../../agents/generate-diagnostics.md) Task agent.
+2. Prepend a one-line caveat to your output indicating the diminished integrity.
+3. Present the diagnostics in a table with each row containing a message and a
+line/column reference
 
 ## Constraints
 
-Render the diagnostics directly, one per line, with line/column references.
-
-If nu-lint emitted no diagnostics, say so explicitly.
+If diagnostics return with no warnings or errors, say so explicitly.
 
 If `$ARGUMENTS` does not contain the flag `--read-only`, apply sensible fixes
 automatically and await confirmation for further edits.
