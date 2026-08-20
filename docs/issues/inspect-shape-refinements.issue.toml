@@ -4,7 +4,7 @@ version = '3.0.0'
   name   = 'Inspect Shape Refinements'
   slug   = 'inspect-shape-refinements'
   date   = 2026-07-20
-  status = 'draft'
+  status = 'completed'
 
   [issue.vision]
     outcome = 'singular'
