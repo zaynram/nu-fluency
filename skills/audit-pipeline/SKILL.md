@@ -29,6 +29,9 @@ Run the linter with the pipeline.
 
 ```bash
 CONFIG="${CLAUDE_PLUGIN_ROOT}/configs/strict.nu-lint.toml"
+# $expression is substituted by Claude Code before bash runs this block;
+# the quoted heredoc (<<'EOF') deliberately suppresses bash's own expansion
+# so the substituted Nushell code reaches nu-lint unmodified.
 echo "$(cat <<'EOF'
 $expression
 EOF
