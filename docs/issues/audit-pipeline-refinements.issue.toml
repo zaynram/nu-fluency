@@ -4,7 +4,7 @@ version = '3.0.0'
   name   = 'Audit Pipeline Refinements'
   slug   = 'audit-pipeline-refinements'
   date   = 2026-07-20
-  status = 'draft'
+  status = 'completed'
 
   [issue.vision]
     outcome = 'singular'
