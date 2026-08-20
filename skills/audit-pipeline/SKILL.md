@@ -1,45 +1,43 @@
 ---
 name: audit-pipeline
-description: Audit a provided Nushell pipeline. Executes `nu-lint` for diagnostics if available, otherwise uses an experimental agent as fallback.
-arguments: [pipeline]
-argument-hint: [expression]
-allowed-tools: ["Bash", "Task", "Read"]
+description: Generate diagnostics from a Nushell code snippet by executing `nu-lint` if available, otherwise uses an experimental agent as fallback. Use when debugging any Nushell code, after authoring any Nushell code, before running the `nu_exec` or `nu_repl` MCP tools, or when the user mentions "Nushell diagnostics", "nu-lint", "Nushell linter", or "generate Nushell diagnostics".
+arguments: [expression]
+argument-hint: [<expression>, "[--read-only]"]
+allowed-tools: ["Bash(*)", "Task(*)", "Read(*)"]
+shell: bash
 ---
 
 # Audit Pipeline
 
 ## Environment
 
-```!
-echo 'resolving nu-lint installation'
-which nu-lint ||
-   wsl.exe --exec which nu-lint ||
-   echo 'nu-lint is not installed'
-```
+- Nushell version: !`nu --version`
+- Nu-Lint native installation path: !`which nu-lint || true`
+- Nu-Lint WSL installation path: !`wsl.exe --exec which nu-lint || true`
+
+If the native Nu-Lint installation path is not empty, follow the standard [procedure](#procedure).
+
+Else, if the WSL installation path is not empty, then
+follow the standard [procedure](#procedure) with the entire command call wrapped
+with `wsl.exe` to ensure the binary is on PATH.
+
+Else, follow the [fallback](#fallback) instructions.
 
 ## Procedure
 
-The pipeline to review: `$pipeline`
+Run the linter with the pipeline.
 
-1. Determine if `nu-lint` is installed using the [environment](#Environment) output.
-
-2. If `nu-lint` is available:
-
-Run the linter with the pipeline piped in as a raw string:
-
-```nu
-let config: path = `${CLAUDE_PLUGIN_ROOT}` | path join configs strict.nu-lint.toml
-r#'$pipeline'# | nu-lint --stdin --format=compact --config=$config
+```bash
+CONFIG="${CLAUDE_PLUGIN_ROOT}/configs/strict.nu-lint.toml"
+echo "$(cat <<'EOF'
+$expression
+EOF
+)" | nu-lint --stdin --format compact --config "$CONFIG"
 ```
 
-Render the diagnostics directly, one per line, with line/column references.
+## Fallback
 
-- For each diagnostic, surface `nu-lint --explain <rule>` output as the "why"
-- If nu-lint emitted no diagnostics, say so explicitly — clean pipeline
-
-2. Else,
-
-Use the `generate-diagnostics` Task agent as a fallback diagnostics generator.
+Invoke the [`generate-diagnostics`](../../agents/generate-diagnostics.md) Task agent.
 
 Prepend a one-line caveat to your output indicating the diminished integrity.
 
@@ -47,4 +45,12 @@ Report your findings in a neat, organized fashion.
 
 ## Constraints
 
-Never apply rewrites automatically; the user decides what to take.
+Render the diagnostics directly, one per line, with line/column references.
+
+If nu-lint emitted no diagnostics, say so explicitly.
+
+If `$ARGUMENTS` does not contain the flag `--read-only`, apply sensible fixes
+automatically and await confirmation for further edits.
+
+Else, present the diagnostics to the user without making any changes, and
+for each diagnostic, surface `nu-lint --explain <rule>` output.
