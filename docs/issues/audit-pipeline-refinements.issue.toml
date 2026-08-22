@@ -55,21 +55,21 @@ index = 4
   [tasks.1]
     id        = 'prose-refinements'
     target    = 'Skill prose corrected and annotated.'
-    completed = false
+    completed = 2026-08-20
     subtasks  = [
       {
         synopsis = 'Correct step numbering',
         llm      = 'automation',
-        done     = false
+        done     = true
       },
       {
         synopsis = 'Annotate template substitution',
         llm      = 'augmentation',
-        done     = false
+        done     = true
       },
       {
         synopsis = 'Add hook-vs-command boundary sentence',
         llm      = 'none',
-        done     = false
+        done     = true
       },
     ]
