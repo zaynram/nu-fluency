@@ -1,0 +1,63 @@
+version = '3.0.0'
+
+[issue]
+  extends = ['docs/issues/hooks-placement.issue.toml']
+  name    = 'MADR Adoption'
+  slug    = 'madr-adoption'
+  date    = 2026-08-21
+  status  = 'completed'
+
+  [issue.vision]
+    outcome = 'singular'
+
+    [[issue.vision.output]]
+      purpose = 'Adopted ADR template, recorded as the first ADR.'
+      path    = 'docs/decisions/'
+
+    [issue.vision.criteria]
+      requirements = [
+        'A single ADR template adopted for the repository, with the adoption itself recorded as the first ADR.',
+      ]
+      constraints  = [
+        'The adoption record is self-describing: written in the template it adopts.',
+      ]
+
+    [[issue.vision.scope.excluded]]
+      item     = 'ADRs authored under the template'
+      deferred = false
+
+    [issue.vision.landscape]
+      internal = [
+        {
+          type     = 'greenfield',
+          synopsis = 'No ADR convention existed; format and location undecided.'
+        },
+      ]
+
+  [issue.bindings]
+    [[issue.bindings.xvalue]]
+      type = 'precomputed-context'
+      item = 'Fixing the record format once removes the per-decision cost of choosing structure.'
+
+  [issue.reference]
+    url    = 'https://github.com/zaynram/nu-fluency/issues/12'
+    branch = 'docs/madr-adoption'
+    index  = 12
+
+[tasks]
+  [tasks.1]
+    id        = 'adopt-template'
+    target    = 'ADR template selected and recorded.'
+    completed = 2026-08-21
+    subtasks  = [
+      {
+        synopsis = 'Select ADR template',
+        llm      = 'augmentation',
+        done     = true
+      },
+      {
+        synopsis = 'Record adoption as first ADR',
+        llm      = 'none',
+        done     = true
+      },
+    ]
