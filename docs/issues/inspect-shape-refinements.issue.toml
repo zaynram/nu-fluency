@@ -59,48 +59,48 @@ index = 3
   [tasks.1]
     id        = 'confirm-dual-invocable'
     target    = 'Dual invocation confirmed and documented.'
-    completed = false
+    completed = 2026-08-20
     subtasks  = [
       {
         synopsis = 'Confirm dual-invocable behavior',
         llm      = 'none',
-        done     = false
+        done     = true
       },
       {
         synopsis = 'State both triggers in description',
         llm      = 'augmentation',
-        done     = false
+        done     = true
       },
     ]
 
   [tasks.2]
     id        = 'script-cleanup'
     target    = 'Inspection script cleaned of dead paths.'
-    completed = false
+    completed = 2026-08-20
     subtasks  = [
       {
         synopsis = 'Remove EMPTY sample field',
         llm      = 'automation',
-        done     = false
+        done     = true
       },
       {
         synopsis = 'Excise unused PRIMITIVES',
         llm      = 'automation',
-        done     = false
+        done     = true
       },
       {
         synopsis = 'Remove dead nothing arm',
         llm      = 'automation',
-        done     = false
+        done     = true
       },
       {
         synopsis = 'Unify duplicate closure handling',
         llm      = 'augmentation',
-        done     = false
+        done     = true
       },
       {
         synopsis = 'Note nu>=0.114 requirement',
         llm      = 'automation',
-        done     = false
+        done     = true
       },
     ]

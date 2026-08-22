@@ -1,0 +1,65 @@
+version = '3.0.0'
+
+[issue]
+  name   = 'Issue Status Backfill'
+  slug   = 'issue-status-backfill'
+  date   = 2026-08-21
+  status = 'completed'
+
+  [issue.vision]
+    outcome = 'singular'
+
+    [[issue.vision.output]]
+      purpose = 'Closed issue records with task-level completion restored.'
+      path    = 'docs/issues/'
+
+    [issue.vision.criteria]
+      requirements = [
+        'Every task and subtask under a closed issue reflects its true completion state.',
+        'Task completion carries the actual closure date, not a boolean.',
+      ]
+      constraints  = [
+        'Metadata correction only; no issue definition, vision, or scope is altered.',
+      ]
+
+    [[issue.vision.scope.excluded]]
+      item     = 'Issues still open or aborted'
+      deferred = false
+
+    [issue.vision.landscape]
+      internal = [
+        {
+          type            = 'brownfield',
+          reference       = 'docs/issues/',
+          synopsis        = 'Closed issues #3 and #4 record completion at the issue level only.',
+          incompatibility = 'Task and subtask flags still read false, so the records contradict themselves and lose the closure date.'
+        },
+      ]
+
+  [issue.bindings]
+    [[issue.bindings.xvalue]]
+      type = 'practice-fidelity'
+      item = 'Records track what was actually done, so completion state survives past the session that produced it.'
+
+  [issue.reference]
+    url    = 'https://github.com/zaynram/nu-fluency/issues/13'
+    branch = 'chore/issue-status-backfill'
+    index  = 13
+
+[tasks]
+  [tasks.1]
+    id        = 'backfill-flags'
+    target    = 'Task-level completion restored on closed issues.'
+    completed = 2026-08-21
+    subtasks  = [
+      {
+        synopsis = 'Backfill inspect-shape-refinements',
+        llm      = 'automation',
+        done     = true
+      },
+      {
+        synopsis = 'Backfill audit-pipeline-refinements',
+        llm      = 'automation',
+        done     = true
+      },
+    ]
