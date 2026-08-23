@@ -3,8 +3,8 @@ version = '3.0.0'
 [issue]
   name   = 'Hooks Placement Decision'
   slug   = 'hooks-placement'
-  date   = 2026-07-20
-  status = 'draft'
+  date   = 2026-08-21
+  status = 'aborted'
 
   [issue.vision]
     outcome = 'singular'
