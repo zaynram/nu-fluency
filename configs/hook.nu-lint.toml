@@ -9,7 +9,7 @@
     dead-code = 'hint'     # useful but lower priority
 
     # Stylistic rules — off in hook mode because they fire on every other
-    # line of valid code. Enable in your editor's LSP config or via /nu-audit.
+    # line of valid code. Enable in your editor's LSP config or via /audit-pipeline.
     naming         = 'off'
     formatting     = 'off'
     documentation  = 'off'

@@ -1,4 +1,4 @@
-# nu-fluency: lint the `pipeline` argument of an MCP nu_run call.
+# nu-fluency: lint the `pipeline` argument of an MCP nu_exec call.
 #
 # Reads tool-input JSON from stdin (Claude Code's hook protocol),
 # pipes the pipeline string through nu-lint, and emits a non-empty
@@ -64,7 +64,7 @@ def format-reason []: string -> string {
     let diagnostics = $in
     let count = $diagnostics | lines | length
     let header = $"nu-lint flagged ($count) issue\(s\) in the just-executed nu pipeline."
-    let footer = 'Run `nu-lint --fix <file>` to auto-fix where possible, or `/nu-audit` for guidance. To silence specific rules edit `configs/hook.nu-lint.toml`.'
+    let footer = 'Run `nu-lint --fix <file>` to auto-fix where possible, or `/audit-pipeline` for guidance. To silence specific rules edit `configs/hook.nu-lint.toml`.'
     [$header '' $diagnostics '' $footer] | str join "\n"
 }
 

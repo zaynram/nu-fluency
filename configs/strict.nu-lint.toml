@@ -1,4 +1,4 @@
-# nu-fluency strict config: broad rule set for explicit `/nu-audit` runs.
+# nu-fluency strict config: broad rule set for explicit `/audit-pipeline` runs.
 # Less conservative than hook mode — surfaces everything nu-lint can flag.
 
 [groups]
