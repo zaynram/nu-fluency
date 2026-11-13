@@ -48,20 +48,6 @@ The `$` prefix turns either quote form into an interpolation. Inside `(…)`, fu
 
 When `parse` doesn't fit, full regex is available via `str replace --regex` (substitute) and `find --regex` (filter list elements). For extraction with captures, `parse --regex '(?<name>pattern)'` reads more cleanly than `find --regex` followed by post-processing.
 
-## NUON string subtleties
-
-When asserting on NUON output, **strings get quoted differently depending on context**:
-
-- Top-level string `"hello"` → NUON `"hello"` (quoted)
-- Inside a list `[hello, world]` → NUON `[hello, world]` (some bare-identifier-like strings unquoted)
-- Inside a record `{key: "hello"}` → NUON `{key: hello}` (same)
-
-This means `r.nuon === '"hello"'` is the right comparison for a top-level string, but `r.nuon.includes('"hello"')` may fail for a hello-inside-a-list NUON. **The robust pattern for tests is to do the equality check inside nu** and assert the resulting boolean:
-
-```nu
-$expected == $actual    # → true/false (always NUON-safe to compare)
-```
-
 ## When bash's text-stream model leaks in
 
 Coming from bash, the instinct is "transform text → transform text → final text." In nu, the better instinct is "parse text into structured data once, transform structurally, render to text at the very end." If a pipeline has three `str replace` calls in a row, it's almost always a sign you should be parsing into a record first and using `update` instead.

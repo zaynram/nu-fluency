@@ -29,7 +29,7 @@ Syntax reference: [cheat-sheet → Control Flow](../nushell-idioms/references/ch
 | `any { \|x\| … }` | Bool | **No** | "Is there any element matching?" |
 | `all { \|x\| … }` | Bool | **No** | "Do all elements match?" |
 | `take while { \|x\| … }` | Prefix of list | **No** | Slice up to first failing |
-| `skip while { \|x\| … }` | Suffix of list | **No** | Slice past last passing |
+| `skip while { \|x\| … }` | Suffix of list | **No** | Slice from first failing |
 | `enumerate` | List of `{index, item}` | **No** | When you need the index |
 | `items { \|k, v\| … }` (on records) | List of closure results | **No** | Iterating record entries |
 

@@ -72,7 +72,7 @@ The `?` postfix is **the** idiom for safe access — works inline on any cell pa
 
 ## Selecting columns with `--optional`
 
-`select --optional KEY1 KEY2` is `?` for the column-projection case — missing keys return null instead of erroring. Useful when probing `$env` or unknown-shape data. The deprecated `-i` flag does the same thing; new code should use `--optional`.
+`select --optional KEY1 KEY2` is `?` for the column-projection case — missing keys return null instead of erroring. Useful when probing `$env` or unknown-shape data. `get` and `reject` take the same flag. Its old spelling, `--ignore-errors` (`-i`), is deprecated since nu 0.106 on all three commands; new code uses `--optional` (`-o`).
 
 ## Record ↔ table ↔ list
 
@@ -110,6 +110,6 @@ For ordered key/value pairs where the same key can appear multiple times (HTTP h
 ## Pitfalls
 
 - **`into record` on a multi-row table** keeps only the last row. Surprising; use `items`+`into record` pattern instead.
-- **`get` returns null on missing key** with `--ignore-errors`, otherwise errors. `?` postfix on cell path is the inline equivalent.
+- **`get` errors on a missing key** unless given `--optional` (`-o`), which returns null instead. Don't write the deprecated `--ignore-errors` (`-i`) spelling. `?` postfix on cell path is the inline equivalent.
 - **Records preserve insertion order**, but operations like `transpose` may reorder; don't rely on iteration order semantically.
 - **Empty record literal is `{}`**, which is identical to JSON syntax — but `{1 2 3}` is invalid record syntax (use `[1 2 3]` for a list).
