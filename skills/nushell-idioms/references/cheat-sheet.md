@@ -293,7 +293,7 @@ let s: string = 42      # invalid (parser error)
 
 ```nu
 # transform case
-"hello world" | str upcase           # "HELLO WORLD"
+"hello world" | str uppercase        # "HELLO WORLD"
 "hello world" | str capitalize       # "Hello world"
 "camel_case"  | str camel-case       # "camelCase"
 
@@ -521,14 +521,14 @@ maybe "alice"                       # "alice"
 
 # flags: presence-only (--loud) and value-bearing (--prefix)
 def greet [name: string, --loud, --prefix: string = "hi"] {
-  if $loud { $"($prefix | str upcase) ($name | str upcase)" } else { $"($prefix) ($name)" }
+  if $loud { $"($prefix | str uppercase) ($name | str uppercase)" } else { $"($prefix) ($name)" }
 }
 greet "alice"                       # "hi alice"
 greet "alice" --loud                # "HI ALICE"
 greet "alice" --prefix "hello"      # "hello alice"
 
 # short flag alias: --loud (-l)
-def shout [name: string, --loud (-l)] { if $loud { $name | str upcase } else { $name } }
+def shout [name: string, --loud (-l)] { if $loud { $name | str uppercase } else { $name } }
 shout "alice" -l                    # "ALICE"
 
 # rest parameters (...name: type)
