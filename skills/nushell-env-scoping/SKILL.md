@@ -8,7 +8,7 @@ description: >
   env-propagation distinction, and Nushell's automatic env vars. Trigger
   phrases: "env mutation", "$env", "scope", "load-env", "with-env",
   "do --env", "env doesn't propagate", "auto env var".
-version: 0.1.0
+version: 0.2.0
 user-invocable: false
 ---
 
@@ -81,6 +81,7 @@ $env | select --optional KEY1 KEY2 KEY3
 - **`do { … }` without `--env`** silently swallows mutations. The default is "isolate"; the opt-in is "propagate."
 - **A failed `load-env` is atomic** — if the record contains one bad key (e.g. `PWD`), nothing else loads. Per-key try-load is defensive.
 - **`with-env` changes do NOT escape** — that's the design. If you want propagation, use `do --env`.
+- **`hide-env` silently does nothing after an env-propagating call in the same scope** (a Nushell bug, still present in 0.117.0). Once a `do --env { … }` or a `def --env` command has run earlier in the scope, or anywhere up the call stack, a later `hide-env X` leaves `X` set and raises no error: `$env.FOO = 1; do { do --env { }; hide-env FOO; $env has FOO }` is `true`. Don't rely on `hide-env` to scrub an environment; for a child process, build its environment explicitly (`^env -i …` on POSIX, or pass only the keys you mean with `with-env`).
 
 ## Appendix: file-backed env persistence
 
