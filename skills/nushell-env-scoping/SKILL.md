@@ -43,7 +43,7 @@ Bulk-merges a record into env at the current scope. Subject to the same propagat
 
 ## Automatic env vars (cannot be set manually)
 
-Observed on nu 0.111 and not re-verified on 0.114 (the corpus floor), these three error with `automatic_env_var_set_manually` if you try to `load-env` them:
+Verified on nu 0.117 (the corpus floor; first observed on 0.111), these three error with `automatic_env_var_set_manually` if you try to `load-env` them:
 
 - `PWD` — set by `cd`
 - `FILE_PWD` — directory of the running script

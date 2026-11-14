@@ -6,7 +6,7 @@ A plugin that helps Claude write [Nushell](https://github.com/nushell/nushell) (
 
 ```nu
 # 1. Ensure your Nushell version is compatible
-version | get version # >= 0.114.0
+version | get version # >= 0.117.0
 # 2. Add the plugin marketplace
 claude plugin marketplace add zaynram/code-marketplace
 # 3. Install the `nu-fluency` plugin

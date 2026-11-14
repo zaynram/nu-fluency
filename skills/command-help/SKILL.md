@@ -4,7 +4,7 @@ description: Get helpful information using the `nu_doc_help` and `nu_doc_search`
 arguments: [query]
 argument-hint: [<query>]
 allowed-tools: ["mcp__nushell__nu_doc_help", "mcp__nushell__nu_doc_search"]
-compatibility: { nu: '>=0.114.0' }
+compatibility: { nu: '>=0.117.0' }
 version: 0.1.2
 ---
 
