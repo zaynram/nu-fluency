@@ -1,8 +1,20 @@
 {
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "nu --stdin ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/nu-over-bash.nu",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
-        "matcher": "mcp__nushell__nu_exec",
+        "matcher": "mcp__.*nushell__nu_(exec|repl_write)",
         "hooks": [
           {
             "type": "command",
