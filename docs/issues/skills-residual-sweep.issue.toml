@@ -4,7 +4,7 @@ version = '3.0.0'
   name   = 'Skills Residual Sweep'
   slug   = 'skills-residual-sweep'
   date   = 2026-07-20
-  status = 'draft'
+  status = 'completed'
 
   [issue.vision]
     outcome = 'singular'
@@ -66,7 +66,7 @@ index = 7
   [tasks.1]
     id        = 'per-skill-edits'
     target    = 'All four skill edits landed or confirmed present.'
-    completed = true
+    completed = 2026-11-14
     subtasks  = [
       {
         synopsis = 'Verify edits absent from the 17 commits',
