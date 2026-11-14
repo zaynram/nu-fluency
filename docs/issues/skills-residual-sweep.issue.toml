@@ -4,7 +4,7 @@ version = '3.0.0'
   name   = 'Skills Residual Sweep'
   slug   = 'skills-residual-sweep'
   date   = 2026-07-20
-  status = 'draft'
+  status = 'completed'
 
   [issue.vision]
     outcome = 'singular'
@@ -66,31 +66,31 @@ index = 7
   [tasks.1]
     id        = 'per-skill-edits'
     target    = 'All four skill edits landed or confirmed present.'
-    completed = false
+    completed = 2026-11-14
     subtasks  = [
       {
         synopsis = 'Verify edits absent from the 17 commits',
         llm      = 'automation',
-        done     = false
+        done     = true
       },
       {
         synopsis = 'records: ignore-errors deprecation',
         llm      = 'augmentation',
-        done     = false
+        done     = true
       },
       {
         synopsis = 'strings: excise JS-NUON',
         llm      = 'automation',
-        done     = false
+        done     = true
       },
       {
         synopsis = 'env-scoping: demote persistence, pin, pitfall',
         llm      = 'augmentation',
-        done     = false
+        done     = true
       },
       {
         synopsis = 'control-flow: confirm current',
         llm      = 'augmentation',
-        done     = false
+        done     = true
       },
     ]

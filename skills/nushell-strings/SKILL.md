@@ -26,7 +26,7 @@ The strongest single tool. Takes a template with named captures and returns a **
 
 ### 2. The `str` namespace
 
-Covers ~95% of single-string manipulation — case conversion (`upcase`, `downcase`, `capitalize`, `camel-case`, `snake-case`, etc.), inspection (`length`, `contains`, `starts-with`, `ends-with`, `index-of`, `distance`), slicing (`substring`), replacement (`replace`, `replace --all`, `replace --regex`), trimming (`trim`, `trim --char`), and reshaping (`reverse`, `expand`). Tab-complete `str ` to discover the full set; 23 subcommands as of nu 0.113.
+Covers ~95% of single-string manipulation — case conversion (`uppercase`, `lowercase`, `capitalize`, `camel-case`, `snake-case`, etc.), inspection (`length`, `contains`, `starts-with`, `ends-with`, `index-of`, `distance`), slicing (`substring`), replacement (`replace`, `replace --all`, `replace --regex`), trimming (`trim`, `trim --char`), and reshaping (`reverse`, `expand`). Tab-complete `str ` to discover the full set; 25 subcommands as of nu 0.117, two of them (`upcase`, `downcase`) deprecated.
 
 ### 3. The `from <format>` family
 
@@ -47,20 +47,6 @@ The `$` prefix turns either quote form into an interpolation. Inside `(…)`, fu
 ## Regex
 
 When `parse` doesn't fit, full regex is available via `str replace --regex` (substitute) and `find --regex` (filter list elements). For extraction with captures, `parse --regex '(?<name>pattern)'` reads more cleanly than `find --regex` followed by post-processing.
-
-## NUON string subtleties
-
-When asserting on NUON output, **strings get quoted differently depending on context**:
-
-- Top-level string `"hello"` → NUON `"hello"` (quoted)
-- Inside a list `[hello, world]` → NUON `[hello, world]` (some bare-identifier-like strings unquoted)
-- Inside a record `{key: "hello"}` → NUON `{key: hello}` (same)
-
-This means `r.nuon === '"hello"'` is the right comparison for a top-level string, but `r.nuon.includes('"hello"')` may fail for a hello-inside-a-list NUON. **The robust pattern for tests is to do the equality check inside nu** and assert the resulting boolean:
-
-```nu
-$expected == $actual    # → true/false (always NUON-safe to compare)
-```
 
 ## When bash's text-stream model leaks in
 

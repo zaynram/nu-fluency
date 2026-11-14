@@ -31,7 +31,7 @@ This is the entire spec. The biggest trap is writing `each { |x| $env.LAST = $x 
 
 ### `do { … }` and `do --env { … }`
 
-Plain `do` runs the closure in an isolated scope — env mutations inside vanish at the closing brace. `do --env` propagates mutations back to the caller; reach for it whenever a closure should write to the outer env (e.g. persistence-layer save steps that need to see the user pipeline's `$env.FOO = …` writes).
+Plain `do` runs the closure in an isolated scope — env mutations inside vanish at the closing brace. `do --env` propagates mutations back to the caller; reach for it whenever a closure should write to the outer env (e.g. a later step that needs to see `$env.FOO = …` writes made inside the closure).
 
 ### `with-env { … } { … }`
 
@@ -43,7 +43,7 @@ Bulk-merges a record into env at the current scope. Subject to the same propagat
 
 ## Automatic env vars (cannot be set manually)
 
-In nu 0.111, these three error with `automatic_env_var_set_manually` if you try to `load-env` them:
+Verified on nu 0.117 (the corpus floor; first observed on 0.111), these three error with `automatic_env_var_set_manually` if you try to `load-env` them:
 
 - `PWD` — set by `cd`
 - `FILE_PWD` — directory of the running script
@@ -75,9 +75,16 @@ $env | select --optional KEY1 KEY2 KEY3
 
 `select --optional` returns null for missing keys instead of erroring — perfect for "did this get set or not." Avoid `print $env.KEY?` chains; assemble the diagnostic as a single record so you can see all the answers together.
 
-## The persistence-layer pattern
+## Pitfalls
 
-When persisting env across nu invocations (file-backed bucket of `$env` entries), the load/save loop is:
+- **`each` for env is the most common bug**. If you find yourself writing `each { |x| $env.something = … }`, switch to `for` immediately.
+- **`do { … }` without `--env`** silently swallows mutations. The default is "isolate"; the opt-in is "propagate."
+- **A failed `load-env` is atomic only for automatic vars** — if the record contains one (e.g. `PWD`), nothing else loads. A failure inside an `ENV_CONVERSIONS` conversion is not: every key in the record stays loaded. Per-key try-load is defensive.
+- **`with-env` changes do NOT escape** — that's the design. If you want propagation, use `do --env`.
+
+## Appendix: file-backed env persistence
+
+A niche case: carrying `$env` across separate nu invocations through a file. Prefer a persistent session (e.g. a REPL) when one is available. If a file is the only option, the load/save loop is:
 
 ```nu
 # Load
@@ -100,11 +107,4 @@ $env
 | save --force --raw $path
 ```
 
-The `for`+`try` on load and the `items`+`where`+`into record` on save are the two patterns to memorize. Both lean on nu's structural-data primitives rather than imperative accumulation.
-
-## Pitfalls
-
-- **`each` for env is the most common bug**. If you find yourself writing `each { |x| $env.something = … }`, switch to `for` immediately.
-- **`do { … }` without `--env`** silently swallows mutations. The default is "isolate"; the opt-in is "propagate."
-- **A failed `load-env` is atomic** — if the record contains one bad key (e.g. `PWD`), nothing else loads. Per-key try-load is defensive.
-- **`with-env` changes do NOT escape** — that's the design. If you want propagation, use `do --env`.
+It reuses two patterns covered above: per-key `for`+`try` on load, and `items`+`where`+`into record` on save.

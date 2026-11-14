@@ -1,7 +1,7 @@
 ---
 name: nushell-idioms
 description: Educates and reinforces idiomatic Nushell patterns as a knowledge base to avoid writing bash-translated patterns in Nushell code. Use when writing, reading, debugging, or executing Nushell code (e.g. a `.nu` script, a `.nuon` file, the `nu_exec`/`nu_repl` MCP tools) or when the user mentions 'nushell', 'nu script', 'nu pipeline', 'writing nu', 'calling nu_exec', 'convert this to nu'.
-compatibility: { nu: '>=0.114.0' }
+compatibility: { nu: '>=0.117.0' }
 version: 0.1.1
 ---
 
