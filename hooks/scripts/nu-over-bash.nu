@@ -34,10 +34,18 @@ const PIPED_ONLY = [grep egrep sort uniq wc tr]
 # Commands that only count when their output feeds a pipe.
 const PIPING_ONLY = [cat]
 
+# Blank out quoted strings so separators inside them (`echo 'a | jq'`, a
+# `nu -c '…'` program) are not read as shell syntax. Escaped quotes inside
+# double quotes are kept inside the string.
+def strip-quotes []: string -> string {
+    str replace --all --regex `'[^']*'` "''"
+    | str replace --all --regex `"(\\.|[^"\\])*"` '""'
+}
+
 # Split a shell command into segments on pipes and command separators, and
 # return the command word of each with whether it reads from or feeds a pipe.
 def segments []: string -> table<cmd: string, piped: bool, pipes: bool> {
-    let pieces = $in | split row --regex '(\|\||&&|;|\n)'
+    let pieces = $in | strip-quotes | split row --regex '(\|\||&&|;|\n)'
     $pieces | each {|piece|
         let parts = $piece | split row '|'
         let last = ($parts | length) - 1
@@ -55,10 +63,9 @@ def segments []: string -> table<cmd: string, piped: bool, pipes: bool> {
 # Hints for a command, or an empty list when nothing applies.
 def hints-for []: string -> list<string> {
     let command = $in
-    if ($command | str trim | split row --regex '\s+' | first | default '' | path basename) in [nu nu.exe] {
-        return []
-    }
     let segs = $command | segments
+    # Already running nu somewhere in the command: nothing to nudge.
+    if ($segs | any cmd in [nu nu.exe]) { return [] }
     let matched = $segs
     | where cmd in ($HINTS | columns)
     | where piped or cmd not-in $PIPED_ONLY

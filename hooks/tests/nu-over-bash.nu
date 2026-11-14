@@ -23,6 +23,10 @@ def main [] {
         'cat README.md'
         'git log | head -5'
         "nu -c 'ls | length'"
+        "FOO=1 nu -c 'ls | sort -r'"
+        "cd /tmp && nu -c 'ls | sort -r'"
+        "echo 'x | jq .x'"
+        'echo "a \\" | jq"'
     ] {
         assert equal (nudge $command) null $'expected no nudge for: ($command)'
     }
