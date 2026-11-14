@@ -79,7 +79,7 @@ $env | select --optional KEY1 KEY2 KEY3
 
 - **`each` for env is the most common bug**. If you find yourself writing `each { |x| $env.something = … }`, switch to `for` immediately.
 - **`do { … }` without `--env`** silently swallows mutations. The default is "isolate"; the opt-in is "propagate."
-- **A failed `load-env` is atomic** — if the record contains one bad key (e.g. `PWD`), nothing else loads. Per-key try-load is defensive.
+- **A failed `load-env` is atomic only for automatic vars** — if the record contains one (e.g. `PWD`), nothing else loads. A failure inside an `ENV_CONVERSIONS` conversion is not: every key in the record stays loaded. Per-key try-load is defensive.
 - **`with-env` changes do NOT escape** — that's the design. If you want propagation, use `do --env`.
 
 ## Appendix: file-backed env persistence
