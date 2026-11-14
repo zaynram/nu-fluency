@@ -8,7 +8,7 @@ description: >
   filtered, or restructured. Trigger phrases: "record", "table",
   "key/value", "select column", "build a record", "filter columns",
   "transform $env".
-version: 0.1.0
+version: 0.2.0
 user-invocable: false
 ---
 
@@ -24,7 +24,8 @@ Syntax reference: [cheat-sheet → Records / Tables](../nushell-idioms/reference
 - **Table** = list of records with shared columns. Indexed by position (row) AND name (column).
 - **Cell paths** like `$x.a.b.2` work uniformly across records, tables, and lists.
 - **`transpose`** moves between table and key/value-pair form.
-- **`into record`** collapses a list of single-key records into one merged record.
+- **`record each` / `record where`** map and filter a record into a new record (nu >= 0.117).
+- **`into record`** turns a list of `[key value]` pairs or single-key records into one record; given a table it merges the rows.
 
 ## The four record-building patterns
 
@@ -49,22 +50,25 @@ $person | upsert age 31                # insert or update
 # → {a: 1, b: 2, c: 3}
 ```
 
-This works because `into record` merges a list of single-key records into one. The natural pair is `items` (which produces single-key records from a record) — see the next pattern.
+This works because `into record` merges a list of single-key records (or `[key value]` pairs) into one.
 
-### Filter-and-rebuild via `items | where | into record`
+### Map and filter a record with `record each` / `record where`
 
-The single most useful record-shaped pipeline:
+The record-to-record transforms. Both take the same closure contract as `items`:
 
 ```nu
-$env
-| items { |k, v| 
-    if ($v | describe | str starts-with "string") { {($k): $v} } 
-  }
-| where $it != null
-| into record
+# filter: row condition over {key, value} rows, or a closure
+{a: 1, b: "x", c: "y"} | record where {|k v| ($v | describe) == string }   # → {b: x, c: y}
+$env | record where key starts-with NU_
+{a: 1, b: ''} | record where --values { is-not-empty }                      # → {a: 1}
+
+# map: return {$k: …}, a [k v] pair, or null to drop the field
+{a: 1, b: 2} | record each {|k v| {$k: ($v * 2)} }                         # → {a: 2, b: 4}
 ```
 
-Read as: "from each entry, emit a single-key record if the value is a string, drop nulls, merge." Replaces what would be `reduce -f {} { … upsert … }` in older or less-fluent code.
+They are the fastest options by a wide margin (measured on 5,000 fields: `record each` 7.7 ms against 54 ms for `items … | into record`; `record where` 5.4 ms against 16.2 ms for `items … | compact | into record`). Never build a record with `reduce --fold {} { … upsert … }`: every step copies the accumulator, so it is quadratic (625 ms against 24 ms for the `items` form at 5,000 fields).
+
+`items {|k v| … }` remains the tool when the result is not a record (printing, collecting a list), and `items {…} | compact | into record` is the fallback on older nu.
 
 ## Cell paths and safe navigation
 
@@ -84,9 +88,13 @@ The `?` postfix is **the** idiom for safe access — works inline on any cell pa
 #   │ b │  2  │
 #   ╰───┴─────╯ (as a 2-row, 2-column table)
 
-# Table → record (single row only; multi-row collapses to last row)
-[[k v]; [a 1]] | into record
-# → {k: a, v: 1}
+# Key/value table → record
+[[k v]; [a 1] [b 2]] | transpose --ignore-titles --header-row --as-record
+# → {a: 1, b: 2}
+
+# Single-row table → record (into record merges rows; with several rows, later rows win)
+"k=v" | parse "{key}={value}" | into record
+# → {key: k, value: v}
 
 # Record → list of single-key records (via `items`)
 {a: 1, b: 2} | items { |k, v| {($k): $v} }
@@ -97,7 +105,7 @@ The `?` postfix is **the** idiom for safe access — works inline on any cell pa
 # → {a: 1, b: 2}
 ```
 
-The chain `items { … } | where … | into record` is the canonical "filter-and-rebuild a record" pattern. Memorize it; it replaces what feels like it should be a reduce.
+`record where` and `record each` are the canonical "filter-and-rebuild a record" verbs; reach for `transpose k v` only when the entries need table verbs (`sort-by`, `group-by`, multi-step `update`), then `transpose --header-row --as-record` back.
 
 ## Table operations
 
@@ -109,7 +117,8 @@ For ordered key/value pairs where the same key can appear multiple times (HTTP h
 
 ## Pitfalls
 
-- **`into record` on a multi-row table** keeps only the last row. Surprising; use `items`+`into record` pattern instead.
+- **`into record` on a table merges the rows** (union of columns, later rows win): `[[k v]; [a 1] [b 2]] | into record` is `{k: b, v: 2}`, not `{a: 1, b: 2}`. It is not a key/value conversion; use `transpose --ignore-titles --header-row --as-record`.
+- **`rotate` is not `transpose`** for records: `{a: 1} | rotate` puts the value before the key, so `rotate key value` labels the columns backwards. Use `transpose key value`.
 - **`get` errors on a missing key** unless given `--optional` (`-o`), which returns null instead. Don't write the deprecated `--ignore-errors` (`-i`) spelling. `?` postfix on cell path is the inline equivalent.
 - **Records preserve insertion order**, but operations like `transpose` may reorder; don't rely on iteration order semantically.
 - **Empty record literal is `{}`**, which is identical to JSON syntax — but `{1 2 3}` is invalid record syntax (use `[1 2 3]` for a list).
