@@ -2,7 +2,7 @@
 name: nushell-modules
 description: Use when organizing Nushell code into reusable units (e.g. writing a `mod.nu` file, using the `module` keyword), exporting commands (`export def`/`export alias`), creating environment loaders (`export-env`/`source-env`), defining a `main` command for a module or script, importing another module with `use`, or when the user mentions "nu module", "reusable nu code", "export def/alias", "use module", "nu script organization", "main command", or "main subcommands".
 user-invocable: false
-version: 0.1.3
+version: 0.2.0
 compatibility: { nu: '>=0.117.0' }
 ---
 
@@ -28,8 +28,8 @@ Visible after import; private without the keyword.
 - **`export-env { … }`**
 — a setup block that runs once per `use` call
 in the caller's scope to seed module-level env state.
-Use `source-env` to load variables defined by an `export-env` block
-without importing the module itself.
+It runs on a direct `use` only: a module re-exported with `export use`
+(a barrel) does **not** run its `export-env` when the barrel is imported.
 - **`export const NAME = …`**
 — a parse-time constant.
 Accessible as `$namespace.NAME` via record-style cell-path access on the
@@ -177,10 +177,39 @@ members.
 
 Environment seeding and scoping helpers are a valid use for modules.
 
-- Use `export-env` with `source-env <file>` instead of `use <file>`
-to seed environment variables if there are no exported commands.
-- Otherwise, use a wildcard import to seed everything at the same time
-(e.g. `use <file> *`)
+- Prefer `use <file>` to run a module's `export-env`. A `use` of a module
+that is already imported re-parses nothing, and its `export-env` runs only
+when the statement executes, so it is the cheap way to run set-up under a
+guard (`if $interactive { use mymod }`).
+- `source-env <file>` is not an env-only `use`: it runs the file's
+**top-level statements**, so any `use`/`export use` in that file runs the
+imported module's `export-env` unguarded. Keep a file meant for `source-env`
+free of imports.
+- A barrel that re-exports modules (`export use a; export use b`) must run
+their env set-up itself, because `export use` skips `export-env`: add an
+`export-env { use a; use b }` block to the barrel.
+
+## Parse-time keywords and import cost
+
+`use`, `source`, `source-env` and `run` are parser keywords: their targets are
+resolved and parsed when the enclosing file is parsed, not when the statement
+runs.
+
+- A guard only skips evaluation. `if false { source-env nope.nu }` is still a
+parse error when the file is missing, and a guarded `source-env` of an existing
+file re-parses that file on every load.
+- `run <script>` needs a parse-time constant path, so loading a user-supplied
+script means a child process (`^nu $path`), not `run`.
+- `to nuon` is not a const command, so `const X = (… | to nuon)` fails at parse
+time; compute it in a `def`.
+- Import cost is parse cost, and it cannot be deferred: a `job spawn` cannot
+import into the parent scope. Only runtime work in an `export-env` (a scan, a
+child process) can move to a background job; spawn it with `--auto-kill`, or
+interactive `exit` refuses once while it runs.
+- `$nu.startup-time` covers the whole boot but does not register config
+evaluation in every mode (`--config … -e`), so measure an import as process
+wall time: `timeit { ^nu --no-config-file -c 'use mymod; null' }`, minus a bare
+`^nu --no-config-file -c null`.
 
 ## Modules with `nu_exec`
 
@@ -209,6 +238,8 @@ across all execution surfaces.
 the second wins silently; prefer `overlay use foo`/`overlay use bar` with
 `overlay hide` to add and remove commands from the current scope while controlling
 the clobber behavior.
+- **A command named like its module** — `mymod/mod.nu` cannot
+`export def mymod`; export `main` instead (`use mymod; mymod` then calls it).
 - **Dynamic paths** — `use $some_var` only works for variables resolvable
 at parse time; include the parent in `NU_LIB_DIRS` or pass it as a literal or `const`.
 - **Subcommand shadowing** — exported command names eat `main`'s positionals;
