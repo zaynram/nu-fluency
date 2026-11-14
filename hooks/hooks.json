@@ -1,12 +1,24 @@
 {
   "hooks": {
-    "PostToolUse": [
+    "PreToolUse": [
       {
-        "matcher": "mcp__nushell__nu_exec",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "nu --stdin ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/lint-pipeline.nu",
+            "command": "nu --stdin \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/nu-over-bash.nu\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "mcp__.*nushell__nu_(exec|repl_write)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "nu --stdin \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/lint-pipeline.nu\"",
             "timeout": 15
           }
         ]

@@ -4,18 +4,18 @@ version = '3.0.0'
   name   = 'Nu-over-Bash Hooks (Slot C)'
   slug   = 'nu-over-bash-hooks'
   date   = 2026-07-20
-  status = 'draft'
+  status = 'completed'
 
   [issue.vision]
     outcome = 'singular'
 
     [[issue.vision.output]]
       purpose = 'encourage-nu-over-bash PreToolUse hook.'
-      path    = 'per hooks-placement decision'
+      path    = 'hooks/scripts/nu-over-bash.nu'
 
     [[issue.vision.output]]
       purpose = 'thinking-in-nu lint-warn integration.'
-      path    = 'per hooks-placement decision'
+      path    = 'hooks/hooks.json'
 
     [issue.vision.criteria]
       requirements = [
@@ -24,6 +24,7 @@ version = '3.0.0'
       ]
       constraints  = [
         'Sequenced strictly after hooks-placement.',
+        'Placed in plugin-level hooks/hooks.json beside the shipped lint hook (hooks-placement aborted).',
       ]
 
     [issue.vision.landscape]
@@ -57,23 +58,23 @@ index = 6
   [tasks.1]
     id        = 'pretooluse-hook'
     target    = 'PreToolUse nudge hook implemented per placement.'
-    completed = false
+    completed = 2026-11-14
     subtasks  = [
       {
         synopsis = 'Implement encourage-nu-over-bash hook',
         llm      = 'augmentation',
-        done     = false
+        done     = true
       },
     ]
 
   [tasks.2]
     id        = 'lint-warn'
     target    = 'thinking-in-nu lint-warn path integrated.'
-    completed = false
+    completed = 2026-11-14
     subtasks  = [
       {
         synopsis = 'Wire nu-lint warn path',
         llm      = 'augmentation',
-        done     = false
+        done     = true
       },
     ]

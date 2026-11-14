@@ -5,7 +5,7 @@ arguments: [query]
 argument-hint: [<query>]
 allowed-tools: ["mcp__nushell__nu_doc_help", "mcp__nushell__nu_doc_search"]
 compatibility: { nu: '>=0.117.0' }
-version: 0.1.2
+version: 0.1.3
 ---
 
 # Command Help
@@ -40,6 +40,12 @@ top five matches to the user and offer to run `nu_doc_help` to retrieve more
 specific information.
 - Else, inform the user that you were unable to locate any commands
 based on the query.
+
+## Beyond One Command
+
+When the question is whether a feature exists in the installed version, or what
+changed between versions, the website is not the authority: see
+[in-binary docs](./references/in-binary-docs.md).
 
 ## Constraints
 

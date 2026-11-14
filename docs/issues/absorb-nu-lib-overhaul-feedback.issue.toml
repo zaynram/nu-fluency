@@ -1,0 +1,139 @@
+version = '3.0.0'
+
+[issue]
+  name   = 'Absorb nu-lib Overhaul Feedback'
+  slug   = 'absorb-nu-lib-overhaul-feedback'
+  date   = 2026-11-07
+  status = 'completed'
+
+  [issue.vision]
+    outcome = 'singular'
+
+    [[issue.vision.output]]
+      purpose = 'Runbook files preserved verbatim, with an index of the nu-lib _docs they pair with.'
+      path    = 'docs/sources/nu-lib-overhaul/'
+
+    [[issue.vision.output]]
+      purpose = 'records: record each / record where, into record merge semantics, rotate pitfall.'
+      path    = 'skills/nushell-records/SKILL.md'
+
+    [[issue.vision.output]]
+      purpose = 'control-flow: row conditions, cost notes, what $in is, bare words in arms, try/ignore bug.'
+      path    = 'skills/nushell-control-flow/SKILL.md'
+
+    [[issue.vision.output]]
+      purpose = 'env-scoping: hide-env no-op bug.'
+      path    = 'skills/nushell-env-scoping/SKILL.md'
+
+    [[issue.vision.output]]
+      purpose = 'modules: export use vs export-env, source-env semantics, parse-time keywords, import cost.'
+      path    = 'skills/nushell-modules/SKILL.md'
+
+    [[issue.vision.output]]
+      purpose = 'idioms: implicit input, cell-path suffixes, alias and path anti-patterns; cheat-sheet entries.'
+      path    = 'skills/nushell-idioms/'
+
+    [[issue.vision.output]]
+      purpose = 'Abstracted guides from nightly-features.md and testing.md.'
+      path    = 'skills/command-help/references/in-binary-docs.md, skills/nushell-idioms/references/testing.md'
+
+    [issue.vision.criteria]
+      requirements = [
+        'Findings from the four nu-lib _docs files and the runbook land in the skills they belong to.',
+        'Every behavioral claim carried into a skill is re-checked on the corpus floor (0.117).',
+      ]
+      constraints  = [
+        'testing.md is abstracted so no guidance requires the nu-lib test framework.',
+        'Library-specific material (nu-lib module internals, measurements of its own imports) stays out of the skills.',
+      ]
+
+    [issue.vision.landscape]
+      internal = [
+        {
+          type            = 'brownfield',
+          synopsis        = 'Core-language skills that predate 0.117.',
+          reference       = 'skills/',
+          incompatibility = 'Wrong into-record rule and source-env advice; no record each/record where.'
+        },
+      ]
+
+    [issue.vision.scope]
+      excluded = [
+        {
+          item     = 'Runbook files beyond the four supplied',
+          deferred = false
+        },
+        { item = 'Filing the bug drafts upstream', deferred = false },
+      ]
+
+  [issue.bindings]
+    [[issue.bindings.xvalue]]
+      type = 'knowledge-preservation'
+      item = 'Moves hard-won, measured findings out of uncommitted session notes into the skills the agent actually reads.'
+
+  [issue.reference]
+    url    = 'https://github.com/zaynram/nu-fluency/issues/20'
+    branch = 'claude/project-thread-vmww67'
+    index  = 20
+
+[tasks]
+  [tasks.1]
+    id        = 'preserve-sources'
+    target    = 'Runbook files committed; nu-lib _docs linked by permalink.'
+    completed = 2026-11-14
+    subtasks  = [
+      {
+        synopsis = 'Copy the supplied runbook files verbatim',
+        llm      = 'automation',
+        done     = true
+      },
+      {
+        synopsis = 'Index the sources and the 0.117 re-check',
+        llm      = 'augmentation',
+        done     = true
+      },
+    ]
+
+  [tasks.2]
+    id        = 'absorb-findings'
+    target    = 'startup-time, data-shaping, nightly-features and testing findings absorbed into skills.'
+    completed = 2026-11-14
+    subtasks  = [
+      {
+        synopsis = 'startup-time.md: import cost in modules',
+        llm      = 'augmentation',
+        done     = true
+      },
+      {
+        synopsis = 'data-shaping.md: records and control-flow',
+        llm      = 'augmentation',
+        done     = true
+      },
+      {
+        synopsis = 'nightly-features.md: in-binary docs guide',
+        llm      = 'augmentation',
+        done     = true
+      },
+      {
+        synopsis = 'testing.md: framework-free guide',
+        llm      = 'augmentation',
+        done     = true
+      },
+      {
+        synopsis = 'runbook: ergonomics feedback and bug pitfalls',
+        llm      = 'augmentation',
+        done     = true
+      },
+    ]
+
+  [tasks.3]
+    id        = 'reverify-on-floor'
+    target    = 'Carried claims re-checked on nu 0.117.0.'
+    completed = 2026-11-14
+    subtasks  = [
+      {
+        synopsis = 'Probe each claim on 0.117.0 and record the result',
+        llm      = 'automation',
+        done     = true
+      },
+    ]

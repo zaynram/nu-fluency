@@ -97,7 +97,7 @@ hover info, and auto-fixes any time it edits a Nushell file.
 |---|---|---|
 | Skills | 10 | `/nushell-{idioms,records,env-scoping,strings,control-flow,modules}`, `/inspect-shape`, `/env-snapshot`, `/audit-pipeline`, `/command-help` |
 | Agents | 1 | Fallback review agent for `/audit-pipeline` when `nu-lint` isn't installed (**experimental**) |
-| Hooks | 1 | Post-`nu_exec` hook that runs `nu-lint` on the executed pipeline |
+| Hooks | 2 | Pre-`Bash` nudge toward nu equivalents; post-`nu_exec`/`nu_repl_write` hook that runs `nu-lint` on the executed code |
 | LSP | 1 | `nu --lsp` via `lspServers` in `.claude-plugin/plugin.json` |
 | Configs | 2 | `configs/hook.nu-lint.toml`, `configs/strict.nu-lint.toml` |
 
@@ -121,7 +121,7 @@ hover info, and auto-fixes any time it edits a Nushell file.
 #### Model-Only
 
 - **`nushell-records`**
-— records, tables, cell paths, `items | where | into record`.
+— records, tables, cell paths, `record each` / `record where`.
 - **`nushell-env-scoping`**
 — `$env`, `do --env`, `with-env`, `for` vs `each` propagation, automatic env vars.
 - **`nushell-strings`**
@@ -133,8 +133,16 @@ hover info, and auto-fixes any time it edits a Nushell file.
 
 ### Hooks
 
-Post-tool-use hook on MCP `nu_exec` calls.
-Reads the tool's `pipeline` argument from stdin (JSON),
+Pre-tool-use hook on `Bash` calls.
+When the command does text processing that nu does structurally
+(`jq`, `sed`, `awk`, `cut`, `xargs`, `find`, read loops, or `grep`/`wc`/`sort`/`uniq`
+in a pipeline), it adds a short note naming the nu equivalents.
+It never blocks or changes the permission decision; the command runs either way.
+Cases live in `hooks/tests/nu-over-bash.nu`
+(`nu --no-config-file hooks/tests/nu-over-bash.nu`).
+
+Post-tool-use hook on MCP `nu_exec` and `nu_repl_write` calls.
+Reads the tool's `pipeline` (or `input`) argument from stdin (JSON),
 pipes it through `nu-lint --stdin --format compact` using the narrow
 `configs/hook.nu-lint.toml`, and surfaces findings as a block reason iff
 there are diagnostics surfaced.

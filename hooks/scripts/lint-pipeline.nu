@@ -1,4 +1,5 @@
-# nu-fluency: lint the `pipeline` argument of an MCP nu_exec call.
+# nu-fluency: lint the code of an MCP nu_exec or nu_repl_write call
+# (`pipeline` and `input` respectively).
 #
 # Reads tool-input JSON from stdin (Claude Code's hook protocol),
 # pipes the pipeline string through nu-lint, and emits a non-empty
@@ -49,11 +50,13 @@ def resolve-lint-runner []: nothing -> any {
     null
 }
 
-# Extract the user pipeline from the JSON payload Claude Code piped in.
-# Returns the empty string if no pipeline field is present.
+# Extract the user code from the JSON payload Claude Code piped in:
+# nu_exec's `pipeline` or nu_repl_write's `input`.
+# Returns the empty string if neither field is present.
 def extract-pipeline []: record -> string {
     let payload = $in
     $payload.tool_input?.pipeline?
+    | default $payload.tool_input?.input?
     | default $payload.arguments?.pipeline?
     | default ''
     | into string
@@ -63,7 +66,7 @@ def extract-pipeline []: record -> string {
 def format-reason []: string -> string {
     let diagnostics = $in
     let count = $diagnostics | lines | length
-    let header = $"nu-lint flagged ($count) issue\(s\) in the just-executed nu pipeline."
+    let header = $"nu-lint flagged ($count) issue\(s\) in the just-executed nu code."
     let footer = 'Run `nu-lint --fix <file>` to auto-fix where possible, or `/audit-pipeline` for guidance. To silence specific rules edit `configs/hook.nu-lint.toml`.'
     [$header '' $diagnostics '' $footer] | str join "\n"
 }
