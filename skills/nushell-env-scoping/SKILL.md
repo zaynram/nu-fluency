@@ -81,7 +81,6 @@ $env | select --optional KEY1 KEY2 KEY3
 - **`do { … }` without `--env`** silently swallows mutations. The default is "isolate"; the opt-in is "propagate."
 - **A failed `load-env` is atomic** — if the record contains one bad key (e.g. `PWD`), nothing else loads. Per-key try-load is defensive.
 - **`with-env` changes do NOT escape** — that's the design. If you want propagation, use `do --env`.
-- **On nu 0.114, closures hide imports from `scope`**. A `use` inside a closure (`do { use foo.nu; … }`) makes the module's commands callable there, but `scope modules` and `scope commands` evaluated in the same closure don't list them; `nu_exec` wraps pipelines in `do { }`, so its `scope` calls inherit this. Introspect from top-level code, or run the code as its own script (`run`, `nu -c`). From nu 0.115 on, such imports are listed.
 
 ## Appendix: file-backed env persistence
 
