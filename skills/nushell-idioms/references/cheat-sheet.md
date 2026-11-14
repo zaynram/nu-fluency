@@ -146,6 +146,15 @@ $example.nested.value?        # <error>
 $example.nested?.value?       # null
 ```
 
+```nu
+# cell-path suffixes: ? = optional, ! = case-insensitive, !? = both
+$example.NAME!                # alice
+$example.MISSING!?            # null
+# literal cell paths as arguments ($. prefix, same suffixes)
+$example | get $.name         # alice
+$example | select $.name      # {name: alice}
+```
+
 ## Lists
 
 Iteration semantics: [`nushell-control-flow`](../../nushell-control-flow/SKILL.md)
@@ -449,6 +458,13 @@ $val                              # 1  (outer scope unchanged)
 # capture a pipeline result
 let big_files = (ls | where size > 10kb)
 let count     = ($big_files | length)
+```
+
+```nu
+# a bare `let` binds the block's input (no `= $in` needed)
+[1 2] | do { let xs; $xs | length }   # 2
+# mid-pipeline `let` tees: binds the value and passes it on
+[1 2 3] | let xs | length             # 3  ($xs is [1 2 3])
 ```
 
 ## Control Flow

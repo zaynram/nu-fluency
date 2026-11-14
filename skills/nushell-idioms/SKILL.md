@@ -2,7 +2,7 @@
 name: nushell-idioms
 description: Educates and reinforces idiomatic Nushell patterns as a knowledge base to avoid writing bash-translated patterns in Nushell code. Use when writing, reading, debugging, or executing Nushell code (e.g. a `.nu` script, a `.nuon` file, the `nu_exec`/`nu_repl` MCP tools) or when the user mentions 'nushell', 'nu script', 'nu pipeline', 'writing nu', 'calling nu_exec', 'convert this to nu'.
 compatibility: { nu: '>=0.117.0' }
-version: 0.1.1
+version: 0.2.0
 ---
 
 # Nushell Idioms
@@ -139,6 +139,24 @@ let third = $planets.2
 
 Cell paths work on lists too.
 
+### 6. `alias` standing in for a command
+
+```nu
+# anti-pattern — an alias wrapping a closure works, but reads as a typo
+alias count-lines = do {|| lines | length }
+# idiomatic — a def reads as a function and declares its I/O types
+def count-lines []: string -> int { lines | length }
+```
+
+### 7. Path string surgery for a sibling
+
+```nu
+# anti-pattern — reads as string replacement
+$nu.data-dir | path basename --replace nupm/modules
+# idiomatic — says "sibling of data-dir"
+$nu.data-dir | path dirname | path join nupm modules
+```
+
 ## Anti-Patterns: False Positives
 
 `nu` idioms can look unfamiliar coming from bash. These are all correct and intentional:
@@ -223,6 +241,20 @@ with-env {ABC: 123} { $env.ABC } # 123
 
 See [`nushell-env-scoping`](../nushell-env-scoping/SKILL.md) for more information.
 
+4. **Implicit Input**
+
+Pipeline input flows into a block without being named, so code that looks
+empty or unfinished in bash terms is often deliberate:
+
+- `else { }` or a `match` arm `=> ()` passes the input through unchanged.
+- A bare `let x;` (no initializer) binds the block's input; `… | let x | …`
+  binds the value and passes it on.
+- A cell path's `!` suffix means case-insensitive (`$env.path!`), not negation;
+  `!?` is case-insensitive and optional.
+
+See [`nushell-control-flow`](../nushell-control-flow/SKILL.md) for what `$in`
+is inside `match` arms and later statements.
+
 ## Shape Verification
 
 When uncertain what a value's shape is mid-pipeline, inspect it:
@@ -269,6 +301,11 @@ filesystem, env and scope, variables, control flow, custom commands, modules,
 and cross-cutting flags.
 - Each section that has a matching sibling skill links back to it as
 the conceptual reference.
+
+[testing](./references/testing.md)
+
+- Framework-free guidance for testing Nushell code: assertions, child
+interpreters, sandboxed environments, and why tests are called by literal name.
 
 ## Language Protocols: Nushell LSP and Nu-Lint
 
